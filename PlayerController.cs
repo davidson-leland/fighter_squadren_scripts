@@ -9,6 +9,8 @@ public class PlayerController : FighterController{
     [SerializeField]
     protected Canvas baseCanvas;//canvas UI elements
     [SerializeField]
+    protected CanvasController canvasController;
+    [SerializeField]
     protected RectTransform canvasTargetRet;
 
     [SerializeField]
@@ -22,13 +24,19 @@ public class PlayerController : FighterController{
 
     float turnY = 0, turnX = 0;//turning parameters. most important for holding a turn.
 
+    bool usePauseMenu = false;
+
+    [SerializeField]
+    GameObject PauseMenu;
+
+
     protected override void FighterUpdate()
     {
         base.FighterUpdate();
 
         GetInput();
 
-        if(tempTarget != null)
+        if (tempTarget != null)
         {
             Vector3 compVector = CalcCompVector(tempTarget.position);
             Vector3 newCanvasTargetRet = mainCamera.WorldToScreenPoint(tempTarget.position);
@@ -41,12 +49,19 @@ public class PlayerController : FighterController{
             else
             {
 
-                newCanvasTargetRet *= -100;
+                newCanvasTargetRet.x = -100;
+                newCanvasTargetRet.y = -100;
             }
 
             newCanvasTargetRet.z = 0;
             canvasTargetRet.position = newCanvasTargetRet;
         }
+        else
+        {
+            canvasTargetRet.position = new Vector2(-100, -100);
+        }
+
+
     }
 
     protected override void SpawnFighter()
@@ -59,8 +74,13 @@ public class PlayerController : FighterController{
         myFighter.transform.SetParent(transform);
         myFighter.ActivateReticules();
 
+        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend);
+
         //arrowController.gameObject.SetActive(false);
         //canvasTargetRet.gameObject.SetActive(false);
+
+        canvasController.InitHealthBar(myFighter.health.hull, myFighter.health.sheilds);
+        myFighter.health.canvasController = canvasController;     
     }
 
 
@@ -68,6 +88,68 @@ public class PlayerController : FighterController{
     {
         float desiredX = Input.GetAxis("Horizontal");
         float desiredY = Input.GetAxis("Vertical");
+
+        var newCameraPosition = new Vector3();
+        var actualCameraPosition = mainCamera.transform.localPosition;
+        //var tempRotation = myFighter.transform.localRotation.eulerAngles;
+
+        float desiredCameraX = 15 * desiredX;
+        float desiredCameraY = (-5 * desiredY) + 16;
+        float desiredCameraZ = -42;
+
+        if(desiredCameraX > actualCameraPosition.x)
+        {
+            newCameraPosition.x = actualCameraPosition.x +  100 * Time.deltaTime;
+
+            if(newCameraPosition.x > desiredCameraX)
+            {
+                newCameraPosition.x = desiredCameraX;
+            }
+        }
+        else if(desiredCameraX < actualCameraPosition.x)
+        {
+            newCameraPosition.x = actualCameraPosition.x - 100 * Time.deltaTime;
+
+            if (newCameraPosition.x < desiredCameraX)
+            {
+                newCameraPosition.x = desiredCameraX;
+            }
+        }
+        else
+        {
+            newCameraPosition.x = desiredCameraX;
+        }
+
+        if (desiredCameraY > actualCameraPosition.y)
+        {
+            newCameraPosition.y = actualCameraPosition.y + 100 * Time.deltaTime;
+
+            if (newCameraPosition.y > desiredCameraY)
+            {
+                newCameraPosition.y = desiredCameraY;
+            }
+        }
+        else if (desiredCameraY < actualCameraPosition.y)
+        {
+            newCameraPosition.y = actualCameraPosition.y - 100 * Time.deltaTime;
+
+            if (newCameraPosition.y < desiredCameraY)
+            {
+                newCameraPosition.y = desiredCameraY;
+            }
+        }
+        else
+        {
+            newCameraPosition.y = desiredCameraY;
+        }
+        
+
+        /*tempRotation.x = 5f * desiredY;
+        tempRotation.y = 5 * desiredX;
+        tempRotation.z = 0;*/
+
+        //myFighter.transform.localRotation = Quaternion.Euler(tempRotation);//during eventual replication onto networked games remove this rotation.
+       
 
         float x = CalculateTurnRate(desiredX, ref turnX);
         float y = CalculateTurnRate(desiredY, ref turnY);
@@ -85,6 +167,40 @@ public class PlayerController : FighterController{
             //z = -18;was used to handle camera movement
         }
 
+        if (speedMod > 1)
+        {
+            desiredCameraZ = -80f;
+        }
+        else if(speedMod < 1)
+        {
+            desiredCameraZ = -30f;
+        }
+
+        if (desiredCameraZ > actualCameraPosition.z)
+        {
+            newCameraPosition.z = actualCameraPosition.z + 100 * Time.deltaTime;
+
+            if (newCameraPosition.z > desiredCameraZ)
+            {
+                newCameraPosition.z = desiredCameraZ;
+            }
+        }
+        else if (desiredCameraZ < actualCameraPosition.z)
+        {
+            newCameraPosition.z = actualCameraPosition.z - 400 * Time.deltaTime;
+
+            if (newCameraPosition.z < desiredCameraZ)
+            {
+                newCameraPosition.z = desiredCameraZ;
+            }
+        }
+        else
+        {
+            newCameraPosition.z = desiredCameraZ;
+        }
+
+        mainCamera.transform.localPosition = newCameraPosition;
+
         if (Input.GetButton("Fire1"))
         {
             myFighter.AttemptFireBlasters();
@@ -101,6 +217,11 @@ public class PlayerController : FighterController{
         }
 
         MoveFighter(new Vector3(y, x, 0f), speedMod);
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            SwapHud(!usePauseMenu);
+        }
 
     }
 
@@ -175,8 +296,6 @@ public class PlayerController : FighterController{
         List<Transform> targetList = new List<Transform>();
         List<RectTransform> targetLockReticules = new List<RectTransform>();
 
-       
-
         while (Input.GetButton("Fire_Ordinance"))
         {
             lockTime += Time.deltaTime;
@@ -228,16 +347,8 @@ public class PlayerController : FighterController{
             }
 
             //Debug.Log(targetList.Count);
-
             
-                for (int i = 0; i < targetList.Count; i++)
-                {
-                    Vector3 tempV = mainCamera.WorldToScreenPoint(targetList[i].position);
-                    tempV.z = 0;
-
-                    targetLockReticules[i].position = tempV;
-                }
-                      
+            PositionTargetLocks(targetLockReticules, targetList);
 
             yield return null;
         }
@@ -250,15 +361,67 @@ public class PlayerController : FighterController{
         {
             if (launchCounter >= launchTimer)
             {
-                myFighter.FireOrdinance(currentSpeed, targetList[iM]);
-                Destroy(targetLockReticules[iM].gameObject);
+                if(targetList[iM] != null)
+                {
+                    myFighter.FireOrdinance(currentSpeed, targetList[iM]);
+                    Destroy(targetLockReticules[iM].gameObject);
+                }              
+               
                 iM++;
                 launchCounter = 0;
             }
 
             launchCounter += Time.deltaTime;
+            PositionTargetLocks(targetLockReticules, targetList);
             yield return null;
         }
+    }
+
+    void PositionTargetLocks(List<RectTransform> targetLockReticules, List<Transform> targetList)
+    {
+        for (int i = 0; i < targetList.Count; i++)
+        {
+            if (targetLockReticules[i] != null)
+            {
+                if(targetList[i] != null)
+                {
+                    Vector3 tempV = mainCamera.WorldToScreenPoint(targetList[i].position);
+                    tempV.z = 0;
+
+                    targetLockReticules[i].position = tempV;
+                    //Debug.Log(targetList[i].position);
+                }
+                else
+                {
+                    Destroy(targetLockReticules[i].gameObject);
+                }
+
+
+            }
+        }
+    }
+
+    public void SwapHud(bool bpauseMenu)
+    {
+        if (bpauseMenu)
+        {
+            PauseMenu.SetActive(true);
+            usePauseMenu = true;
+            Time.timeScale = 0.0f;
+        }
+        else
+        {
+            PauseMenu.SetActive(false);
+            usePauseMenu = false;
+            Time.timeScale = 1f;
+        }
+    }
+
+    public override void TakeDamage(int ammount)
+    {
+        //Debug.Log("take it and like it");
+        base.TakeDamage(ammount);
+        canvasController.UpdateHealthBar(myFighter.health.hull, myFighter.health.sheilds);
     }
 }
 

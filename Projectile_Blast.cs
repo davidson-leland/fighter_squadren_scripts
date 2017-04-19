@@ -6,6 +6,7 @@ public class Projectile_Blast : MonoBehaviour {
     public float speed = 1000;
 
     public Fighter owner;
+    public string ownerName;
 
     public GameObject blastHit;
     
@@ -42,11 +43,18 @@ public class Projectile_Blast : MonoBehaviour {
 
         //Debug.Log(topLevel);
 
-        if(topLevel.name != "Player")
+        if(topLevel.name != ownerName)
         {
             //Debug.Log(topLevel);
 
             var blast = (GameObject)Instantiate(blastHit, transform.position, transform.rotation);
+
+            var otherController = topLevel.GetComponent<FighterController>();
+
+            if(otherController != null)
+            {
+                otherController.TakeDamage(1);
+            }
 
             blast.transform.SetParent(topLevel.transform);
 

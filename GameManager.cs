@@ -43,6 +43,24 @@ public class GameManager : MonoBehaviour {
         FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible);
 
         Enemy_fighters.Add(newFighter);
+
+       // Enemy_fighters[Enemy_fighters.Count].baseTransform.gameObject.name = "enemy_" + Enemy_fighters.Count;
+    }
+
+    public void RemoveEnemyFighterFromLists(Fighter _fighter)
+    {
+        //Debug.Log(Enemy_fighters.FindIndex(x => x.fighterScript == _fighter));
+
+        Enemy_fighters.Remove(Enemy_fighters.Find(x => x.fighterScript == _fighter));
+
+        Debug.Log(Enemy_fighters.Count);         
+    }
+
+    public void AddHeroFighterToList(Transform _transform, Fighter _fighter, Renderer _visible)
+    {
+        FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible);
+
+        Hero_fighters.Add(newFighter);
     }
 
     public List<Transform> GetEnemiesOnScreen()

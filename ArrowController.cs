@@ -13,7 +13,7 @@ public class ArrowController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        Debug.Log(target);
+        //Debug.Log(target);
         transform.LookAt(target);
 
 	}

@@ -12,33 +12,66 @@ public class Missle_controller : MonoBehaviour {
 
     bool trackTarget = false;
 
-    public GameObject exhaustEffect;
+    public GameObject exhaustEffect, missleBody;
 
     public int directionMod = 1;
 
-    float turnAngle = 0f;
+    float turnAngle = 0f, lastAnglex = 360, lastAngley = 360;
 
-    bool canExplode = true;
+    bool canExplode = true, zonedIn = false, hasExploded = false;
+
+
+
+    RotationalPosition targetRotationalPosition = new RotationalPosition();
+
+    [SerializeField]
+    SphereCollider sphereCollider;
 
     // Use this for initialization
     void Start () {
         Invoke("IgniteMissle", igniteTimer);
         Invoke("Explode", lifeTimer);
         Invoke("SetCanExplode", 2);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-            Vector3 movement = Vector3.forward;
-            movement *= currentSpeed * Time.deltaTime;
-        
+
+    }
+
+    // Update is called once per frame
+    void Update() {
+
+        if (hasExploded)
+        {
+            return;
+        }
+
+        Vector3 movement = Vector3.forward;
+        movement *= currentSpeed * Time.deltaTime;
+
 
         if (trackTarget)
         {
+            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+            //Debug.Log(distanceToTarget);
+
+            if (distanceToTarget < 50 && canExplode)
+            {
+                Explode();
+            }
             //do tracking
             float x = 0, y = 0;
-            
             Vector3 compVector = transform.InverseTransformPoint(target.position);
+            targetRotationalPosition.CalcAngles(compVector);
+
+            if (zonedIn)//if target was infront of us but evaded, stop tracking and shortly after blow up.
+            {
+                if ((lastAnglex < 50 && lastAnglex > -50) && (targetRotationalPosition.horizontalAngle > 50 || targetRotationalPosition.horizontalAngle < -50))
+                {
+                    Debug.Log("lost horizontal");
+                    trackTarget = false;
+
+                    CancelInvoke("Explode");
+                    Invoke("Explode", 0.5f);
+                }
+            }
 
             currentSpeed += topSpeed * Time.deltaTime;
 
@@ -46,60 +79,53 @@ public class Missle_controller : MonoBehaviour {
             {
                 currentSpeed = topSpeed;
             }
+            //horizontal tracking
+            if (targetRotationalPosition.horizontalAngle > -1 && targetRotationalPosition.horizontalAngle < 1)
+            {
+                turnAngle = targetRotationalPosition.horizontalAngle;
+            }
+            else if (targetRotationalPosition.horizontalAngle > 0)
+            {
+                turnAngle = maxTurnAngle * Time.deltaTime;
+            }
+            else if (targetRotationalPosition.horizontalAngle < 0)
+            {
+                turnAngle = -maxTurnAngle * Time.deltaTime;
+            }
 
-
-            if (compVector.y > 5)
+            //vert tracking
+           if (targetRotationalPosition.verticalAngle > -1 && targetRotationalPosition.verticalAngle < 1)
+            {
+                y = -targetRotationalPosition.verticalAngle;
+            }
+            else if (targetRotationalPosition.verticalAngle > 0)
             {
                 y = -maxTurnAngle * Time.deltaTime;
             }
-            else if (compVector.y < -5)
+            else if (targetRotationalPosition.verticalAngle < 0)
             {
                 y = maxTurnAngle * Time.deltaTime;
             }
 
-            if (compVector.x > 10)
-            {
-                //Debug.Log("is to right");
-                turnAngle = maxTurnAngle;
-            }
-            else if (compVector.x < -10)
-            {
-                //Debug.Log("is to left");
-                turnAngle = -maxTurnAngle;
-            }
-            else if (compVector.z > 0)
-            {
-               // Debug.Log("is in front");
-                turnAngle = 0;
+            x = turnAngle;//not sure why keeping this.
 
-                transform.LookAt(target);
-            }
-            else if (compVector.z < 0)
-            {
-
-                //Debug.Log("is in back");
-                if (compVector.x > -.5 && compVector.x < 0.5)
-                {
-                    if (turnAngle == 0 )
-                    {
-                        float t = Random.Range(0, 10);
-
-                        if (t > 5)
-                        {
-                            turnAngle = -30;
-                        }
-                        else
-                        {
-                            turnAngle = 30;
-                        }
-                    }
-                }
-            }
-                
-            x = turnAngle * Time.deltaTime;
             Vector3 rotate = new Vector3(y, x, 0);
 
             transform.Rotate(rotate);
+
+            lastAnglex = targetRotationalPosition.horizontalAngle;
+            lastAngley = targetRotationalPosition.verticalAngle;
+
+
+            if(zonedIn == false)//if target is in a 20 degree cone, this is for tracking if we eventually lose the target for some reason.
+            {
+                if ((lastAnglex > -20 && lastAnglex < 20) && (lastAngley > -20 && lastAngley < 20))
+                {
+                    zonedIn = true;
+                    //Debug.Log("zonedIn");
+                }
+            }
+            
 
         }
         else
@@ -128,20 +154,13 @@ public class Missle_controller : MonoBehaviour {
             topLevel = topLevel.transform.parent.gameObject;
         }
 
-        if(topLevel.GetComponent<Missle_controller>() != null)
+        var othercontroller = topLevel.GetComponent<FighterController>();
+
+        if (othercontroller != null && topLevel.name != "Player")
         {
-            return;
+            othercontroller.TakeDamage( 10);
         }
-
-        //Debug.Log(topLevel);
-
-        if (topLevel.name != "Player")
-        {
-            //Debug.Log(topLevel);
-
-            Explode();
-
-        }
+        
     }
 
     protected void IgniteMissle()
@@ -151,18 +170,21 @@ public class Missle_controller : MonoBehaviour {
         //currentSpeed = topSpeed;
     }
 
-    protected void Explode()
+    protected void Explode(bool dealDamage = false)
     {
         var blast = (GameObject)Instantiate(explosionEffect, transform.position, transform.rotation);
 
-        
+        sphereCollider.enabled = true;
+        missleBody.SetActive(false);
+
         Destroy(blast, 05f);
-        Destroy(gameObject);
+        Destroy(gameObject, 0.2f);
+
+        hasExploded = true;
     }
 
     void SetCanExplode()
     {
         canExplode = true;
     }
-
 }

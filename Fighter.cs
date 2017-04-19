@@ -27,9 +27,6 @@ public class Fighter : MonoBehaviour {
     //public Transform fighterBody;
 
     int firePortNum = 0, directionMod = 1;//fire port num used for firing the laser blasts, direction mod is used for launching missles and is a temp measure
-    
-    [System.NonSerialized]
-    public Vector3 lastPosition = new Vector3();//used for finding target lead
 
     public Renderer testRend;//holder for checking to see if fighter is on camera. will probably change
    
@@ -45,6 +42,12 @@ public class Fighter : MonoBehaviour {
     public FighterController controller;
     [SerializeField]
     GameObject reticules;
+
+    public Health health = new Health();
+
+    Coroutine healthCo;
+
+    public bool alive = true;
 
     // Use this for initialization
     void Start () {
@@ -79,8 +82,13 @@ public class Fighter : MonoBehaviour {
             oldAIControlls();//what we used to do
         }
         
-        lastPosition = transform.parent.position;
-       
+       /* lastPosition = transform.parent.position;
+        Debug.Log("when happens");*/
+
+        /*if(controller as AIFighterController != null)
+        {
+            Debug.Log("health " + health.hull + ". shields = " + health.sheilds);
+        }    */   
 
     }
     //holds old code for reference only
@@ -277,8 +285,10 @@ public class Fighter : MonoBehaviour {
     void AttemptFire(int portNum)
     {
         var blast = (GameObject)Instantiate(blastPrefab, gunPorts[portNum].position, transform.rotation);
-        blast.GetComponent<Projectile_Blast>().speed += topSpeed;
-        blast.GetComponent<Projectile_Blast>().owner = this;
+        var blastScript = blast.GetComponent<Projectile_Blast>();
+        blastScript.speed += topSpeed;
+        blastScript.owner = this;
+        blastScript.ownerName = controller.gameObject.name;
         //blast.name = ("EnergyBlast" + gameObject);
         Destroy(blast, 3.0f);
     }   
@@ -361,90 +371,117 @@ public class Fighter : MonoBehaviour {
                 directionMod = 1;
             }
         }
+    }
 
+    public int TakeDamage(int ammount)//need to move this to fighter script
+    {
+        //return 1;
+
+        if (alive)
+        {
+            int newHull = health.TakeDamage(ammount);
+
+
+            if (newHull > 0)
+            {
+                if (healthCo != null)
+                {
+                    StopCoroutine(healthCo);
+                }
+                healthCo = StartCoroutine(health.RefreshSheilds());
+            }
+            else
+            {
+                Debug.Log("pop goes the weasle");
+                alive = false;
+            }
+            return newHull;
+        }
+
+        return 0;
     }
 
     //old target lock code
-   /* IEnumerator AquireTargets()
-    {
-        float lockTime = 0;
+    /* IEnumerator AquireTargets()
+     {
+         float lockTime = 0;
 
-        //Debug.Log("rawr");
+         //Debug.Log("rawr");
 
-        List<Transform> targetList = new List<Transform>();
-        List<RectTransform> targetLockReticules = new List<RectTransform>();    
+         List<Transform> targetList = new List<Transform>();
+         List<RectTransform> targetLockReticules = new List<RectTransform>();    
 
-        while (Input.GetButton("Fire_Ordinance"))
-        {
-            lockTime += Time.deltaTime;
+         while (Input.GetButton("Fire_Ordinance"))
+         {
+             lockTime += Time.deltaTime;
 
-            if(lockTime > 0.3)
-            {
-                lockTime = 0;
+             if(lockTime > 0.3)
+             {
+                 lockTime = 0;
 
-                if (targetList.Contains(currentTarget))
-                {
-                    var tempTargetList = GameManager.instance.GetEnemiesOnScreen();
-                    float lastDist = 1000;
-                    Transform toADD = tempTargetList[0];
+                 if (targetList.Contains(currentTarget))
+                 {
+                     var tempTargetList = GameManager.instance.GetEnemiesOnScreen();
+                     float lastDist = 1000;
+                     Transform toADD = tempTargetList[0];
 
-                    foreach (Transform t in tempTargetList)
-                    {
-                       
-                        float newT = Vector2.Distance(cameraMain.WorldToViewportPoint(t.position), new Vector2(0.5f, 0.5f));
+                     foreach (Transform t in tempTargetList)
+                     {
 
-                        if (newT < lastDist && !targetList.Contains(t))
-                        {
-                            toADD = t;
-                            lastDist = newT;
-                        }
-                        //Debug.Log(newT);
-                    }
+                         float newT = Vector2.Distance(cameraMain.WorldToViewportPoint(t.position), new Vector2(0.5f, 0.5f));
 
-                    if(!targetList.Contains(toADD) && toADD != null)
-                    {
-                        targetList.Add(toADD);
-                        var newRet = Instantiate(targetLockRetPreFab);
-                        newRet.transform.SetParent(baseCanvas.transform, false);
-                        targetLockReticules.Add(newRet.GetComponent<RectTransform>());
-                    }
-                }
-                else
-                {
-                    targetList.Add(currentTarget);
-                    var newRet = Instantiate(targetLockRetPreFab);
-                    newRet.transform.SetParent(baseCanvas.transform, false);
-                    targetLockReticules.Add(newRet.GetComponent<RectTransform>());
-                }
-            }
+                         if (newT < lastDist && !targetList.Contains(t))
+                         {
+                             toADD = t;
+                             lastDist = newT;
+                         }
+                         //Debug.Log(newT);
+                     }
 
-            for (int i = 0; i < targetList.Count; i++)
-            {
-                Vector3 tempV = cameraMain.WorldToScreenPoint(targetList[i].position);
-                tempV.z = 0;
-                targetLockReticules[i].position = tempV;
-            }
+                     if(!targetList.Contains(toADD) && toADD != null)
+                     {
+                         targetList.Add(toADD);
+                         var newRet = Instantiate(targetLockRetPreFab);
+                         newRet.transform.SetParent(baseCanvas.transform, false);
+                         targetLockReticules.Add(newRet.GetComponent<RectTransform>());
+                     }
+                 }
+                 else
+                 {
+                     targetList.Add(currentTarget);
+                     var newRet = Instantiate(targetLockRetPreFab);
+                     newRet.transform.SetParent(baseCanvas.transform, false);
+                     targetLockReticules.Add(newRet.GetComponent<RectTransform>());
+                 }
+             }
+
+             for (int i = 0; i < targetList.Count; i++)
+             {
+                 Vector3 tempV = cameraMain.WorldToScreenPoint(targetList[i].position);
+                 tempV.z = 0;
+                 targetLockReticules[i].position = tempV;
+             }
 
 
-            yield return null;
-        }
+             yield return null;
+         }
 
-        int iM = 0;
-        float launchTimer = 0.1f;
-        float launchCounter = launchTimer;
+         int iM = 0;
+         float launchTimer = 0.1f;
+         float launchCounter = launchTimer;
 
-        while (iM < targetList.Count)
-        {
-            if(launchCounter >= launchTimer)
-            {
-                FireOrdinance(launchSpeed, targetList[iM]);
-                Destroy(targetLockReticules[iM].gameObject);
-                iM++;
-                launchCounter = 0;               
-            }
+         while (iM < targetList.Count)
+         {
+             if(launchCounter >= launchTimer)
+             {
+                 FireOrdinance(launchSpeed, targetList[iM]);
+                 Destroy(targetLockReticules[iM].gameObject);
+                 iM++;
+                 launchCounter = 0;               
+             }
 
-            launchCounter += Time.deltaTime;
-            yield return null;
-        }       
-    }   */
+             launchCounter += Time.deltaTime;
+             yield return null;
+         }       
+     }   */
 }

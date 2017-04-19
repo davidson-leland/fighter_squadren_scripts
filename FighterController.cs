@@ -16,13 +16,22 @@ public class FighterController : MonoBehaviour {
     
     protected float currentSpeed = 0f;
 
+    public Health fighterHealth;
+
+    public Vector3 targetsLastPosition = new Vector3();
+    public Vector3 myFightersLastPosition = new Vector3();
+
+   protected RotationalPosition targetRotationalPosition = new RotationalPosition();
+
 
     // Use this for initialization
     void Start ()
     {
         SpawnFighter();
         FighterStart();
-       
+
+        Debug.Log(gameObject.name);
+
     }
 
     protected virtual void FighterStart()
@@ -32,8 +41,8 @@ public class FighterController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update ()
-    {
-        FighterUpdate();
+    {       
+       FighterUpdate();
 	}
 
     protected virtual void FighterUpdate()
@@ -56,6 +65,11 @@ public class FighterController : MonoBehaviour {
 
     protected void MoveFighter(Vector3 rotate, float speedMod)
     {
+        if(Time.timeScale == 0)
+        {
+            return;
+        }
+        
         //*****************************
         //sets rotation
         //*****************************
@@ -81,23 +95,32 @@ public class FighterController : MonoBehaviour {
         myFighter.transform.rotation = Quaternion.Euler(newfighterRot);
     }
 
-    protected void GetLead()//change to a return vector3?
+    protected Vector3 GetLead()//change to a return vector3?
     {
-        Vector3 delta = target.transform.position - transform.parent.position;
-        Vector3 vr = ((target.transform.position - target.lastPosition) - (transform.parent.position - myFighter.lastPosition)) / Time.deltaTime;
+        Vector3 toReturn = new Vector3();
+                
+        Vector3 delta = target.transform.position - transform.position;
+        Vector3 vr = ((target.transform.position - targetsLastPosition) - (transform.position - myFightersLastPosition)) / Time.deltaTime;        
 
-        //Debug.Log((transform.parent.position - lastPosition) / Time.deltaTime);
-
-        float t = AimAhead(delta, vr, currentSpeed + 500);
+        float t = AimAhead(delta, vr, currentSpeed + 200f);
+        //Debug.Log(t);
 
         if (t > 0)
         {
-            //targetRet.position = target.transform.position + t * vr;
+           toReturn = target.transform.position + t * vr;
         }
         else
         {
-            //targetRet.position = target.transform.position;
+            
+            toReturn = target.transform.position;
         }
+
+        targetsLastPosition = target.transform.position;
+        myFightersLastPosition = transform.position;
+
+        //Debug.Log(toReturn);
+      
+        return toReturn;
     }
 
     protected float AimAhead(Vector3 delta, Vector3 vr, float muzzleV)
@@ -113,5 +136,29 @@ public class FighterController : MonoBehaviour {
             return 2f * c / (Mathf.Sqrt(det) - b);
         }
         else { return -1; }
+    }
+
+    public virtual void TakeDamage(int ammount)//need to move this to fighter script
+    {
+       
+
+        if (!myFighter.alive)
+        {
+            return;
+        }
+
+        int healthCheck = myFighter.TakeDamage(ammount);
+
+        if (healthCheck <= 0)
+        {
+            //DestroyFighter();
+        }
+        //Debug.Log(myFighter.health.hull);
+ 
+    }
+
+    protected virtual void DestroyFighter()
+    {
+        Destroy(gameObject);
     }
 }

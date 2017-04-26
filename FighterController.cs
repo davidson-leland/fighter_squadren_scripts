@@ -100,10 +100,12 @@ public class FighterController : MonoBehaviour {
         Vector3 toReturn = new Vector3();
                 
         Vector3 delta = target.transform.position - transform.position;
-        Vector3 vr = ((target.transform.position - targetsLastPosition) - (transform.position - myFightersLastPosition)) / Time.deltaTime;        
+        Vector3 vr = ((target.transform.position - targetsLastPosition) /*- ( transform.position - myFightersLastPosition)*/) / Time.deltaTime;
 
-        float t = AimAhead(delta, vr, currentSpeed + 200f);
-        //Debug.Log(t);
+        // super accurate version, but goes all over the place
+        float t = AimAhead(delta, vr, currentSpeed + 400f);
+      
+       
 
         if (t > 0)
         {
@@ -115,11 +117,13 @@ public class FighterController : MonoBehaviour {
             toReturn = target.transform.position;
         }
 
+
         targetsLastPosition = target.transform.position;
         myFightersLastPosition = transform.position;
 
+
         //Debug.Log(toReturn);
-      
+
         return toReturn;
     }
 

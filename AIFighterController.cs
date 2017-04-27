@@ -19,10 +19,13 @@ public class AIFighterController : FighterController {
     GameObject leadIndicator;
     public GameObject leadprefab;
 
+    public float aiReactionTime = 0.2f;
     public float stickSpeed = 500f;//think of this stat as how fast the pilot can move is joystick around.
     float adjustedStickSpeed = 0f;
 
     public Vector3[] previousLeadPoints = new Vector3[0];
+
+    Vector3 delayedTargetLead = new Vector3();
 
     protected override void FighterStart()
     {
@@ -36,6 +39,9 @@ public class AIFighterController : FighterController {
         target = GameManager.instance.Hero_fighters[0].fighterScript;
 
         leadIndicator = (GameObject)Instantiate(leadprefab);
+
+        reactionTime = aiReactionTime;
+
     }
 
     protected override void SpawnFighter()
@@ -60,7 +66,9 @@ public class AIFighterController : FighterController {
     void CalcAITurn()
     {
         //for following a fighter
-          /*Vector3 targetLead = GetLead();
+         Vector3 targetLead = GetLead();
+
+       // StartCoroutine(DelayedSetAimTargetLocation(targetLead));
 
           float distanceToTarget = Vector3.Distance(transform.position, targetLead);       
           Vector3 compVector = CalcCompVector(targetLead);
@@ -70,13 +78,13 @@ public class AIFighterController : FighterController {
         if(distanceToTarget < 1000f)
         {
             myFighter.AttemptFireBlasters();
-        }*/
+        }
 
         //for following navpoints
-       float distanceToTarget = Vector3.Distance(transform.position, currentTravelTarget.position);
+      /* float distanceToTarget = Vector3.Distance(transform.position, currentTravelTarget.position);
        Vector3 compVector = CalcCompVector(currentTravelTarget.position);
-
-        bool abool = false;
+       */
+       
         targetRotationalPosition.CalcAngles(compVector);
 
         float desiredPitchAngle = 0;
@@ -169,5 +177,14 @@ public class AIFighterController : FighterController {
         GameManager.instance.RemoveEnemyFighterFromLists(myFighter);
 
         base.DestroyFighter();
+    }
+
+    IEnumerator DelayedSetAimTargetLocation(Vector3 newLead)
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        delayedTargetLead = newLead;
+
+
     }
 }

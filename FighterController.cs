@@ -24,6 +24,9 @@ public class FighterController : MonoBehaviour {
    protected RotationalPosition targetRotationalPosition = new RotationalPosition();
 
 
+   protected float reactionTime = 0f;
+    Vector3 delayedVR;
+
     // Use this for initialization
     void Start ()
     {
@@ -95,21 +98,31 @@ public class FighterController : MonoBehaviour {
         myFighter.transform.rotation = Quaternion.Euler(newfighterRot);
     }
 
-    protected Vector3 GetLead()//change to a return vector3?
+    protected Vector3 GetLead()
     {
         Vector3 toReturn = new Vector3();
                 
         Vector3 delta = target.transform.position - transform.position;
         Vector3 vr = ((target.transform.position - targetsLastPosition) /*- ( transform.position - myFightersLastPosition)*/) / Time.deltaTime;
 
-        // super accurate version, but goes all over the place
-        float t = AimAhead(delta, vr, currentSpeed + 400f);
+        if(reactionTime > 0)
+        {
+            StartCoroutine(DelayedSetVR(vr));
+        }
+        else
+        {
+            delayedVR = vr;
+        }
+                                                               //    ^
+        // super accurate version, but goes all over the place if we include the noted out code above. |
+        float t = AimAhead(delta, delayedVR, currentSpeed + 400f);
       
+        //idea, add a reaction time coroutine to change VR with a delay.
        
 
         if (t > 0)
         {
-           toReturn = target.transform.position + t * vr;
+           toReturn = target.transform.position + t * delayedVR;
         }
         else
         {
@@ -144,8 +157,6 @@ public class FighterController : MonoBehaviour {
 
     public virtual void TakeDamage(int ammount)//need to move this to fighter script
     {
-       
-
         if (!myFighter.alive)
         {
             return;
@@ -164,5 +175,12 @@ public class FighterController : MonoBehaviour {
     protected virtual void DestroyFighter()
     {
         Destroy(gameObject);
+    }
+
+    IEnumerator DelayedSetVR(Vector3 newVR)
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        delayedVR = newVR;
     }
 }

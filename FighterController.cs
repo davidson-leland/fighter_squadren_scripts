@@ -23,6 +23,9 @@ public class FighterController : MonoBehaviour {
 
    protected RotationalPosition targetRotationalPosition = new RotationalPosition();
 
+    public int team;
+    public bool isPlayer = false;
+
 
    protected float reactionTime = 0f;
     Vector3 delayedVR;
@@ -72,15 +75,25 @@ public class FighterController : MonoBehaviour {
         {
             return;
         }
-        
+
         //*****************************
         //sets rotation
         //*****************************
-        transform.Rotate(rotate);
-
-        //removes z axis rotation
+        transform.Rotate(rotate,Space.Self);
+               
         var oldRotation = transform.rotation.eulerAngles;
         oldRotation.z = 0;
+
+        //clamp axis becouse of a glitch goins past 90 degrees up or down.
+        if(oldRotation.x > 180)
+        {
+            oldRotation.x = Mathf.Clamp(oldRotation.x, 280, 400);//270 is 90 degrees
+        }
+        else
+        {
+            oldRotation.x = Mathf.Clamp(oldRotation.x, -90, 80);
+        }
+
         transform.rotation = Quaternion.Euler(oldRotation);
 
         //*****************************
@@ -101,6 +114,11 @@ public class FighterController : MonoBehaviour {
     protected Vector3 GetLead()
     {
         Vector3 toReturn = new Vector3();
+        
+        if(target == null)
+        {
+            return toReturn;
+        }
                 
         Vector3 delta = target.transform.position - transform.position;
         Vector3 vr = ((target.transform.position - targetsLastPosition) /*- ( transform.position - myFightersLastPosition)*/) / Time.deltaTime;
@@ -166,7 +184,7 @@ public class FighterController : MonoBehaviour {
 
         if (healthCheck <= 0)
         {
-            //DestroyFighter();
+            DestroyFighter();
         }
         //Debug.Log(myFighter.health.hull);
  

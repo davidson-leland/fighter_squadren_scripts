@@ -392,7 +392,7 @@ public class Fighter : MonoBehaviour {
             }
             else
             {
-                Debug.Log("pop goes the weasle");
+               // Debug.Log("pop goes the weasle");
                 alive = false;
             }
             return newHull;

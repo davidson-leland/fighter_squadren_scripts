@@ -6,10 +6,10 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager instance = null;
 
-    public List<FighterInformation> Hero_fighters = new List<FighterInformation>();
-    public List<FighterInformation> Enemy_fighters = new List<FighterInformation>();
-    
-   
+    public List<FighterInformation>[] aiFighters = { new List<FighterInformation>(), new List<FighterInformation>(), new List<FighterInformation>()};
+    public List<FighterInformation>[] PlayerFighters = { new List<FighterInformation>(), new List<FighterInformation>(), new List<FighterInformation>() };
+
+
     void Awake()
     {
         if(instance == null)
@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour {
     
     // Use this for initialization
 	void Start () {
-        //Debug.Log("doing stuff");
+       
 	}
 	
 	// Update is called once per frame
@@ -37,37 +37,37 @@ public class GameManager : MonoBehaviour {
        
 	}
    
-    public void AddEnemyFighterToList(Transform _transform, Fighter _fighter,Renderer _visible)
+    public void AddEnemyFighterToList(Transform _transform, Fighter _fighter,Renderer _visible, int _team)
     {
         //Debug.Log("adding to lists");
         FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible);
 
-        Enemy_fighters.Add(newFighter);
+        aiFighters[_team].Add(newFighter);
 
        // Enemy_fighters[Enemy_fighters.Count].baseTransform.gameObject.name = "enemy_" + Enemy_fighters.Count;
     }
 
-    public void RemoveEnemyFighterFromLists(Fighter _fighter)
+    public void RemoveEnemyFighterFromLists(Fighter _fighter, int _team)
     {
         //Debug.Log(Enemy_fighters.FindIndex(x => x.fighterScript == _fighter));
 
-        Enemy_fighters.Remove(Enemy_fighters.Find(x => x.fighterScript == _fighter));
+        aiFighters[_team].Remove(aiFighters[_team].Find(x => x.fighterScript == _fighter));
 
-        Debug.Log(Enemy_fighters.Count);         
+        //Debug.Log(Enemy_fighters.Count);         
     }
 
-    public void AddHeroFighterToList(Transform _transform, Fighter _fighter, Renderer _visible)
+    public void AddHeroFighterToList(Transform _transform, Fighter _fighter, Renderer _visible, int _team)
     {
         FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible);
 
-        Hero_fighters.Add(newFighter);
+        PlayerFighters[_team].Add(newFighter);
     }
 
-    public List<Transform> GetEnemiesOnScreen()
+    public List<Transform> GetEnemiesOnScreen(int _team)
     {
         List<Transform> toSend = new List<Transform>();
 
-        foreach (FighterInformation fI in Enemy_fighters)
+        foreach (FighterInformation fI in aiFighters[_team])
         {
            // Debug.Log(fI.renderer.isVisible);
 
@@ -80,6 +80,25 @@ public class GameManager : MonoBehaviour {
         }
 
         return toSend;
+    }
+
+    public Fighter FindTargetForAIFighter( int _team)
+    {
+        int i = 0;
+
+        if(i == _team)
+        {
+            i = 1;
+        }
+
+        if(aiFighters[i].Count == 0)
+        {
+            return null;
+        }
+
+        int randomIndex = (int)Random.Range(0, aiFighters[i].Count - 0.1f);
+
+        return aiFighters[i][randomIndex].fighterScript;
     }
 
  }

@@ -27,16 +27,18 @@ public class AIFighterController : FighterController {
 
     Vector3 delayedTargetLead = new Vector3();
 
+    public bool chaseTarget = false;
+
     protected override void FighterStart()
     {
         base.FighterStart();
 
         currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
-        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend);
+        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend, team);
 
         //currentTravelTarget = GameManager.instance.Hero_fighters[0].baseTransform;
-        gameObject.name = gameObject.name + GameManager.instance.Enemy_fighters.Count;
-        target = GameManager.instance.Hero_fighters[0].fighterScript;
+        gameObject.name = "team-" + team + " " + gameObject.name + GameManager.instance.aiFighters[team].Count;
+        target = GameManager.instance.PlayerFighters[0][0].fighterScript;
 
         leadIndicator = (GameObject)Instantiate(leadprefab);
 
@@ -65,25 +67,43 @@ public class AIFighterController : FighterController {
 
     void CalcAITurn()
     {
-        //for following a fighter
-         Vector3 targetLead = GetLead();
+       
+        float distanceToTarget = 10000f;
+        Vector3 compVector = new Vector3();
 
-       // StartCoroutine(DelayedSetAimTargetLocation(targetLead));
+        //determin turn rate if chasing target or just patrolling
+        float modMaxTurnAngle = myFighter.maxTurnAngle;
+        float modMaxPitchAngle = myFighter.maxPitchAngle;
 
-          float distanceToTarget = Vector3.Distance(transform.position, targetLead);       
-          Vector3 compVector = CalcCompVector(targetLead);
-          leadIndicator.transform.position = targetLead;
-
-
-        if(distanceToTarget < 1000f)
+        if (!chaseTarget)
         {
-            myFighter.AttemptFireBlasters();
+            modMaxPitchAngle *= 0.5f;
+            modMaxTurnAngle *= 0.5f;
         }
 
-        //for following navpoints
-      /* float distanceToTarget = Vector3.Distance(transform.position, currentTravelTarget.position);
-       Vector3 compVector = CalcCompVector(currentTravelTarget.position);
-       */
+
+        if (chaseTarget)
+        {
+            if(target == null)
+            {
+                //AquireRandomTarget();
+                chaseTarget = false;
+
+                currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
+            }
+
+            Vector3 targetLead = GetLead();
+
+            distanceToTarget = Vector3.Distance(transform.position, targetLead);
+            compVector = CalcCompVector(targetLead);
+            leadIndicator.transform.position = targetLead;
+        }
+        else
+        {
+            distanceToTarget = Vector3.Distance(transform.position, currentTravelTarget.position);
+            compVector = CalcCompVector(currentTravelTarget.position);
+        }
+        
        
         targetRotationalPosition.CalcAngles(compVector);
 
@@ -92,25 +112,53 @@ public class AIFighterController : FighterController {
        
         if (targetRotationalPosition.horizontalAngle > 0)
         {
-            desiredTurnAngle = myFighter.maxTurnAngle;           
+            desiredTurnAngle = modMaxTurnAngle;           
         }
         else if (targetRotationalPosition.horizontalAngle < 0)
         {
-            desiredTurnAngle = -myFighter.maxTurnAngle;           
+            desiredTurnAngle = -modMaxTurnAngle;           
         }
 
         if (targetRotationalPosition.horizontalAngle < 90 && targetRotationalPosition.horizontalAngle > -90)
         {
             if (targetRotationalPosition.verticalAngle > 0)
             {
-                desiredPitchAngle = -myFighter.maxTurnAngle;
+                desiredPitchAngle = -modMaxPitchAngle;
             }
             else if (targetRotationalPosition.verticalAngle < 0)
             {
-                desiredPitchAngle = +myFighter.maxTurnAngle;
+                desiredPitchAngle = +modMaxPitchAngle;
             }
         }
-        
+        else
+        {
+            // first lets center vertical rotation back to zero. later on we can set v rotation based on height of target.
+            float currentvAngle = transform.rotation.eulerAngles.x;
+
+            //Debug.Log(currentvAngle);
+
+            if(currentvAngle > 180 && currentvAngle < 350)
+            {
+                desiredPitchAngle = modMaxPitchAngle;
+            }
+            else if( currentvAngle > 10 && currentvAngle < 180)
+            {
+                desiredPitchAngle = -modMaxPitchAngle;
+            }
+
+        }
+
+        if (distanceToTarget < 1000f && chaseTarget)
+        {
+            if(targetRotationalPosition.horizontalAngle < 10 && targetRotationalPosition.horizontalAngle > -10)
+            {
+                if(targetRotationalPosition.verticalAngle < 10 && targetRotationalPosition.verticalAngle > -10)
+                {
+                    myFighter.AttemptFireBlasters();
+                }
+            }
+        }
+
 
         turnAngle = AdjustAngle(desiredTurnAngle, turnAngle);
         pitchAngle = AdjustAngle(desiredPitchAngle, pitchAngle);       
@@ -144,6 +192,13 @@ public class AIFighterController : FighterController {
         {
             currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
             //Debug.Log("change targets");
+
+            if (Random.Range(0f, 10f) > 7)
+            {
+                AquireRandomTarget();
+                //chaseTarget = true;
+            }
+                
         }
 
         MoveFighter(new Vector3(y, x, 0), 1);
@@ -174,7 +229,7 @@ public class AIFighterController : FighterController {
 
     protected override void DestroyFighter()
     {
-        GameManager.instance.RemoveEnemyFighterFromLists(myFighter);
+        GameManager.instance.RemoveEnemyFighterFromLists(myFighter, team);
 
         base.DestroyFighter();
     }
@@ -182,9 +237,22 @@ public class AIFighterController : FighterController {
     IEnumerator DelayedSetAimTargetLocation(Vector3 newLead)
     {
         yield return new WaitForSeconds(0.2f);
-
         delayedTargetLead = newLead;
+    }
 
+    public void AquireRandomTarget()
+    {
 
+        var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
+        
+        if(tempTarget == null)
+        {
+            chaseTarget = false;
+        }
+        else
+        {
+            target = tempTarget;
+            chaseTarget = true;
+        }
     }
 }

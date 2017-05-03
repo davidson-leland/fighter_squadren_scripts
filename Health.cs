@@ -64,7 +64,7 @@ public class Health {
             yield return null;
         }
         float x = shieldRefreshRate * maxSheilds;
-        Debug.Log(t + ", should be equal to " + x);
+        //Debug.Log(t + ", should be equal to " + x);
     }
 	
 }

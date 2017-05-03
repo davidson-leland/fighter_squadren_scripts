@@ -74,13 +74,15 @@ public class PlayerController : FighterController{
         myFighter.transform.SetParent(transform);
         myFighter.ActivateReticules();
 
-        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend);
+        team = 0;
+        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, team);
 
         //arrowController.gameObject.SetActive(false);
         //canvasTargetRet.gameObject.SetActive(false);
 
         canvasController.InitHealthBar(myFighter.health.hull, myFighter.health.sheilds);
-        myFighter.health.canvasController = canvasController;     
+        myFighter.health.canvasController = canvasController;
+        isPlayer = true;    
     }
 
 
@@ -259,7 +261,7 @@ public class PlayerController : FighterController{
 
     void AquireNewTarget()
     {
-        var targetList = GameManager.instance.GetEnemiesOnScreen();
+        var targetList = GameManager.instance.GetEnemiesOnScreen(1);
         float lastDist = 1000;
 
         foreach (Transform t in targetList)
@@ -281,7 +283,6 @@ public class PlayerController : FighterController{
             canvasTargetRet.gameObject.SetActive(true);
             arrowController.gameObject.SetActive(true);
             arrowController.target = tempTarget;
-
         }
     }
 
@@ -305,7 +306,7 @@ public class PlayerController : FighterController{
 
                 if ( targetList.Contains(tempTarget) || tempTarget == null )
                 {
-                    var tempTargetList = GameManager.instance.GetEnemiesOnScreen();
+                    var tempTargetList = GameManager.instance.GetEnemiesOnScreen(1);
 
                     if(tempTargetList.Count > 0)
                     {

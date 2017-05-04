@@ -8,8 +8,6 @@ public class GameSetup : MonoBehaviour {
     public Transform[] testcourse;
     public SpawnNodes[] teamSpawns;
 
-   
-
     public int teamSize = 10;
     
     void Awake()
@@ -26,45 +24,9 @@ public class GameSetup : MonoBehaviour {
         StartCoroutine(InitialSpawnFighters(0, teamSize));
         StartCoroutine(InitialSpawnFighters(1, teamSize));
 
-        Invoke("StartAttacking", 10f);    
+        StartCoroutine(RespawnTimer(20));
     }
-
-    //only used atm for testing purposes to get ai fighters to attack eachother. should eventually be moved to game manager
-    void StartAttacking()
-    {
-        int i = 0;
-
-      /*  foreach (FighterInformation f in GameManager.instance.aiFighters[1])
-        {           
-            AIFighterController ai = f.fighterScript.controller as AIFighterController;
-
-            ai.AquireRandomTarget();
-            ai.chaseTarget = true;
-
-            i++;
-
-            if(i > 5)
-            {
-                break;
-            }
-        }
-
-        i = 0;
-      foreach (FighterInformation f in GameManager.instance.aiFighters[0])
-        {
-            AIFighterController ai = f.fighterScript.controller as AIFighterController;
-
-            ai.AquireRandomTarget();
-            ai.chaseTarget = true;
-
-            i++;
-
-            if (i > 5)
-            {
-                break;
-            }
-        }*/
-    }
+    
 	
 	// Update is called once per frame
 	void Update () {
@@ -90,23 +52,42 @@ public class GameSetup : MonoBehaviour {
     {
         yield return new WaitForSeconds(0.5f);
 
-        int spawned = 0;
+        StartCoroutine(SpawnFighters(_team, _teamSize));               
+    }
 
-        while(spawned < _teamSize)
+    IEnumerator SpawnFighters(int _team, int _teamSize)
+    {
+        Debug.Log("spawn fighters called");
+        int spawned = GameManager.instance.aiFighters[_team].Count;
+
+        Debug.Log("spawned fighters = " + spawned);
+
+        while (spawned < _teamSize)
         {
-            for(int i = 0; i < teamSpawns[_team].spawnNodes.Length; i++)
+            for (int i = 0; i < teamSpawns[_team].spawnNodes.Length; i++)
             {
 
-                if(spawned < _teamSize)
+                if (spawned < _teamSize)
                 {
+                    Debug.Log("spawning fighter");
                     SpawnAIFighter(_team, teamSpawns[_team].spawnNodes[i]);
                     spawned++;
-                } 
+                }
+                yield return new WaitForSeconds(0.2f);
             }
-
-            yield return new WaitForSeconds(02f);
         }
-        
+    }
+
+    IEnumerator RespawnTimer(float respawnTime)
+    {
+        while (true)//replace with something else in future
+        {
+            yield return new WaitForSeconds(respawnTime);
+
+            Debug.Log("respawning fighters");
+           StartCoroutine( SpawnFighters(0, teamSize));
+           StartCoroutine( SpawnFighters(1, teamSize));
+        }
     }
 }
 

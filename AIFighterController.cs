@@ -28,6 +28,7 @@ public class AIFighterController : FighterController {
     Vector3 delayedTargetLead = new Vector3();
 
     public bool chaseTarget = false;
+    bool canLooseTarget = false, loosingTarget = false;
 
     protected override void FighterStart()
     {
@@ -40,7 +41,7 @@ public class AIFighterController : FighterController {
         gameObject.name = "team-" + team + " " + gameObject.name + GameManager.instance.aiFighters[team].Count;
         target = GameManager.instance.PlayerFighters[0][0].fighterScript;
 
-        leadIndicator = (GameObject)Instantiate(leadprefab);
+       // leadIndicator = (GameObject)Instantiate(leadprefab);
 
         reactionTime = aiReactionTime;
 
@@ -96,7 +97,7 @@ public class AIFighterController : FighterController {
 
             distanceToTarget = Vector3.Distance(transform.position, targetLead);
             compVector = CalcCompVector(targetLead);
-            leadIndicator.transform.position = targetLead;
+            //leadIndicator.transform.position = targetLead;
         }
         else
         {
@@ -155,6 +156,17 @@ public class AIFighterController : FighterController {
                 if(targetRotationalPosition.verticalAngle < 10 && targetRotationalPosition.verticalAngle > -10)
                 {
                     myFighter.AttemptFireBlasters();
+                    canLooseTarget = true;
+                }
+            }
+            else if (canLooseTarget)
+            {
+                if (targetRotationalPosition.horizontalAngle < -60 || targetRotationalPosition.horizontalAngle > 60 || targetRotationalPosition.verticalAngle < -60 || targetRotationalPosition.verticalAngle > 60)
+                {
+                    if (!loosingTarget)
+                    {
+                        StartCoroutine(AttemptFindTarget(02f));
+                    }
                 }
             }
         }
@@ -240,9 +252,26 @@ public class AIFighterController : FighterController {
         delayedTargetLead = newLead;
     }
 
+    IEnumerator AttemptFindTarget(float AttemptTime)
+    {
+        loosingTarget = true;
+        yield return new WaitForSeconds(AttemptTime);
+
+        if (targetRotationalPosition.horizontalAngle < -60 || targetRotationalPosition.horizontalAngle > 60 || targetRotationalPosition.verticalAngle < -60 || targetRotationalPosition.verticalAngle > 60)
+        {
+            chaseTarget = false;
+
+            currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
+            Debug.Log("lost target");
+        }
+
+        loosingTarget = false;
+        canLooseTarget = false;
+    }
+
     public void AquireRandomTarget()
     {
-
+        
         var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
         
         if(tempTarget == null)

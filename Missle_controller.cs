@@ -30,7 +30,7 @@ public class Missle_controller : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Invoke("IgniteMissle", igniteTimer);
-        Invoke("Explode", lifeTimer);
+        Invoke("TimedExplosion", lifeTimer);
         Invoke("SetCanExplode", 2);
 
     }
@@ -49,29 +49,70 @@ public class Missle_controller : MonoBehaviour {
 
         if (trackTarget)
         {
-            float distanceToTarget = Vector3.Distance(transform.position, target.position);
-            //Debug.Log(distanceToTarget);
-
-            if (distanceToTarget < 50 && canExplode)
-            {
-                Explode();
-            }
-            //do tracking
             float x = 0, y = 0;
-            Vector3 compVector = transform.InverseTransformPoint(target.position);
-            targetRotationalPosition.CalcAngles(compVector);
 
-            if (zonedIn)//if target was infront of us but evaded, stop tracking and shortly after blow up.
+            if (target != null)
             {
-                if ((lastAnglex < 50 && lastAnglex > -50) && (targetRotationalPosition.horizontalAngle > 50 || targetRotationalPosition.horizontalAngle < -50))
-                {
-                    Debug.Log("lost horizontal");
-                    trackTarget = false;
 
-                    CancelInvoke("Explode");
-                    Invoke("Explode", 0.5f);
+                float distanceToTarget = Vector3.Distance(transform.position, target.position);
+                //Debug.Log(distanceToTarget);
+
+                if (distanceToTarget < 50 && canExplode)
+                {
+                    Explode();
+                }
+
+                Vector3 compVector = transform.InverseTransformPoint(target.position);
+                targetRotationalPosition.CalcAngles(compVector);
+
+                if (zonedIn)//if target was infront of us but evaded, stop tracking and shortly after blow up.
+                {
+                    if ((lastAnglex < 50 && lastAnglex > -50) && (targetRotationalPosition.horizontalAngle > 50 || targetRotationalPosition.horizontalAngle < -50))
+                    {
+                        Debug.Log("lost horizontal");
+                        trackTarget = false;
+
+                        CancelInvoke("Explode");
+                        Invoke("Explode", 0.5f);
+                    }
+                }
+
+                //horizontal tracking
+                if (targetRotationalPosition.horizontalAngle > -1 && targetRotationalPosition.horizontalAngle < 1)
+                {
+                    turnAngle = targetRotationalPosition.horizontalAngle;
+                }
+                else if (targetRotationalPosition.horizontalAngle > 0)
+                {
+                    turnAngle = maxTurnAngle * Time.deltaTime;
+                }
+                else if (targetRotationalPosition.horizontalAngle < 0)
+                {
+                    turnAngle = -maxTurnAngle * Time.deltaTime;
+                }
+
+                //vert tracking
+                if (targetRotationalPosition.verticalAngle > -1 && targetRotationalPosition.verticalAngle < 1)
+                {
+                    y = -targetRotationalPosition.verticalAngle;
+                }
+                else if (targetRotationalPosition.verticalAngle > 0)
+                {
+                    y = -maxTurnAngle * Time.deltaTime;
+                }
+                else if (targetRotationalPosition.verticalAngle < 0)
+                {
+                    y = maxTurnAngle * Time.deltaTime;
                 }
             }
+            else
+            {
+                turnAngle = 0;
+            }
+
+            //do tracking
+            
+           
 
             currentSpeed += topSpeed * Time.deltaTime;
 
@@ -79,33 +120,7 @@ public class Missle_controller : MonoBehaviour {
             {
                 currentSpeed = topSpeed;
             }
-            //horizontal tracking
-            if (targetRotationalPosition.horizontalAngle > -1 && targetRotationalPosition.horizontalAngle < 1)
-            {
-                turnAngle = targetRotationalPosition.horizontalAngle;
-            }
-            else if (targetRotationalPosition.horizontalAngle > 0)
-            {
-                turnAngle = maxTurnAngle * Time.deltaTime;
-            }
-            else if (targetRotationalPosition.horizontalAngle < 0)
-            {
-                turnAngle = -maxTurnAngle * Time.deltaTime;
-            }
-
-            //vert tracking
-           if (targetRotationalPosition.verticalAngle > -1 && targetRotationalPosition.verticalAngle < 1)
-            {
-                y = -targetRotationalPosition.verticalAngle;
-            }
-            else if (targetRotationalPosition.verticalAngle > 0)
-            {
-                y = -maxTurnAngle * Time.deltaTime;
-            }
-            else if (targetRotationalPosition.verticalAngle < 0)
-            {
-                y = maxTurnAngle * Time.deltaTime;
-            }
+           
 
             x = turnAngle;//not sure why keeping this.
 
@@ -168,6 +183,11 @@ public class Missle_controller : MonoBehaviour {
         trackTarget = true;
         exhaustEffect.SetActive(true);
         //currentSpeed = topSpeed;
+    }
+
+    void TimedExplosion()
+    {
+        Explode();
     }
 
     protected void Explode(bool dealDamage = false)

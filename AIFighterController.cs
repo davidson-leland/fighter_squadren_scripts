@@ -85,7 +85,7 @@ public class AIFighterController : FighterController {
 
         if (chaseTarget)
         {
-            if(target == null)
+            if(target == null)//if we no longer have valid target go back to patrolling
             {
                 //AquireRandomTarget();
                 chaseTarget = false;
@@ -262,7 +262,7 @@ public class AIFighterController : FighterController {
             chaseTarget = false;
 
             currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
-            Debug.Log("lost target");
+            //Debug.Log("lost target");
         }
 
         loosingTarget = false;

@@ -36,7 +36,7 @@ public class FighterController : MonoBehaviour {
         SpawnFighter();
         FighterStart();
 
-        Debug.Log(gameObject.name);
+        //Debug.Log(gameObject.name);
 
     }
 

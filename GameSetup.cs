@@ -21,7 +21,7 @@ public class GameSetup : MonoBehaviour {
     // Use this for initialization
 	void Start () {
 
-        StartCoroutine(InitialSpawnFighters(0, teamSize));
+        //StartCoroutine(InitialSpawnFighters(0, teamSize));
         StartCoroutine(InitialSpawnFighters(1, teamSize));
 
         StartCoroutine(RespawnTimer(20));
@@ -57,10 +57,10 @@ public class GameSetup : MonoBehaviour {
 
     IEnumerator SpawnFighters(int _team, int _teamSize)
     {
-        Debug.Log("spawn fighters called");
+        //Debug.Log("spawn fighters called");
         int spawned = GameManager.instance.aiFighters[_team].Count;
 
-        Debug.Log("spawned fighters = " + spawned);
+        //Debug.Log("spawned fighters = " + spawned);
 
         while (spawned < _teamSize)
         {
@@ -69,7 +69,7 @@ public class GameSetup : MonoBehaviour {
 
                 if (spawned < _teamSize)
                 {
-                    Debug.Log("spawning fighter");
+                    //Debug.Log("spawning fighter");
                     SpawnAIFighter(_team, teamSpawns[_team].spawnNodes[i]);
                     spawned++;
                 }
@@ -84,7 +84,7 @@ public class GameSetup : MonoBehaviour {
         {
             yield return new WaitForSeconds(respawnTime);
 
-            Debug.Log("respawning fighters");
+           // Debug.Log("respawning fighters");
            StartCoroutine( SpawnFighters(0, teamSize));
            StartCoroutine( SpawnFighters(1, teamSize));
         }

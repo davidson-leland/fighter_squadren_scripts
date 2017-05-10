@@ -85,7 +85,7 @@ public class GameSetup : MonoBehaviour {
             yield return new WaitForSeconds(respawnTime);
 
            // Debug.Log("respawning fighters");
-           StartCoroutine( SpawnFighters(0, teamSize));
+         //  StartCoroutine( SpawnFighters(0, teamSize));
            StartCoroutine( SpawnFighters(1, teamSize));
         }
     }

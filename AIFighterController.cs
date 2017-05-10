@@ -207,7 +207,7 @@ public class AIFighterController : FighterController {
 
             if (Random.Range(0f, 10f) > 7)
             {
-                AquireRandomTarget();
+                //AquireRandomTarget();
                 //chaseTarget = true;
             }
                 

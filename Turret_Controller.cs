@@ -12,34 +12,30 @@ public class Turret_Controller : MonoBehaviour {
 
     [SerializeField]
     protected float trackingSpeed = 50;
-
-    public Health health = new Health();
+    [SerializeField]
+    protected float snapToTargetAngle = 2;
 
     public int team;
 
     protected Fighter target = null;
     public Vector3 targetsLastPosition = new Vector3();
 
-    RotationalPosition targetRotationalPosition = new RotationalPosition();
+    protected RotationalPosition targetRotationalPosition = new RotationalPosition();
 
     [SerializeField]
     protected Transform rotator;
 
     protected bool canFire = true;
-    bool isfiring = false;
+    protected bool isfiring = false;
 
     [SerializeField]
     GameObject blastPrefab;
 
-    [SerializeField]
-    protected float reactionTime = 0;
-
-    Vector3 delayedVR;
-
-    Vector3 drift = new Vector3();
+    protected Vector3 drift = new Vector3();
 
     [SerializeField]
-    float accuracy = 30f;
+    protected float accuracy_Drift = 30f;
+
 
    // int targetIndex = 0;
 
@@ -50,95 +46,33 @@ public class Turret_Controller : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
+        TurretStart();
+
+    }
+
+    protected virtual void TurretStart()
+    {
         StartCoroutine(SetDrift());
-	}
+    }
 	
 	// Update is called once per frame
 	void Update ()
-    {
-        if(target == null)
-        {
-            // target = GameManager.instance.PlayerFighters[0][0].fighterScript;
-
-             AquireRandomTarget();
-
-            //AquireNextTarget();          
-            
-        }
-
+    {   
         TurretUpdate(Time.deltaTime);
 	}
 
-    protected void TurretUpdate(float tick)//im going to operate on the assumption that this will be faster than accessing time.deltatime everytine i need it.
+    //used individually in the child classes
+    protected virtual void TurretUpdate(float tick)//im going to operate on the assumption that this will be faster than accessing time.deltatime everytine i need it.
     {
-        if(target != null )
-        {
-            float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
-
-            if(distanceToTarget < 2000)
-            {
-                       
-
-                Vector3 compVector = transform.InverseTransformPoint(target.transform.position);
-                //compVector = transform.InverseTransformPoint(targetLead);
-                targetRotationalPosition.CalcAngles(compVector);
-
-                if ((targetRotationalPosition.horizontalAngle < angleMax && targetRotationalPosition.horizontalAngle > -angleMax)
-                    && (targetRotationalPosition.verticalAngle < angleMax && targetRotationalPosition.verticalAngle > -angleMax))
-                {
-                    TrackTarget(tick);
-
-                    //Debug.Log(distanceToTarget);                    
-
-                    if (distanceToTarget < 1500 && canFire && !isfiring)
-                    {
-                        //Debug.Log("try fire turret");
-
-                        /* if (targetRotationalPosition.verticalAngle < 10 && targetRotationalPosition.verticalAngle > -10)
-                         {
-                             if (targetRotationalPosition.verticalAngle < 10 && targetRotationalPosition.verticalAngle > -10)
-                             {
-                                 StartCoroutine(FireTurret());
-                             }
-                         }   */
-
-                        StartCoroutine(FireTurret());
-                    }
-                }
-                else
-                {
-                    target = null;
-                }
-            }
-            else
-            {
-                target = null;
-               // Debug.Log("+++++++++++++++ Target too far ++++++++++++++");
-            }            
-        }
+        
     }
 
-    protected void TrackTarget(float tick)
+    protected void TrackTarget(float tick, Vector3 toTrack)
     {
-
-
-        Vector3 targetLead = GetLead() + drift;
-
-        
-        /*if (leadIndicator != null)
-        {
-            leadIndicator.position = targetLead;
-        }*/
-
-
-        Vector3 compVector = new Vector3();
-
-        //compVector = rotator.InverseTransformPoint(target.transform.position);
-
-        compVector = rotator.InverseTransformPoint(targetLead);
-
-
+        Vector3 compVector = rotator.InverseTransformPoint(toTrack);
         targetRotationalPosition.CalcAngles(compVector);
+
+        //Debug.Log(targetRotationalPosition.horizontalAngle);
 
         float desiredAngleX = 0;
         float desiredAngleY = 0;
@@ -167,7 +101,7 @@ public class Turret_Controller : MonoBehaviour {
             //don't rotate past the target, save new turnangle that is applied.
             if ((x > 0 && x > targetRotationalPosition.horizontalAngle) || (x < 0 && x < targetRotationalPosition.horizontalAngle))
             {
-                if (targetRotationalPosition.horizontalAngle < 2 && targetRotationalPosition.horizontalAngle > -2)
+                if (targetRotationalPosition.horizontalAngle < snapToTargetAngle && targetRotationalPosition.horizontalAngle > -snapToTargetAngle)
                 {
                     x = targetRotationalPosition.horizontalAngle;                    
                 }
@@ -175,14 +109,14 @@ public class Turret_Controller : MonoBehaviour {
 
             if ((y > 0 && y > targetRotationalPosition.verticalAngle) || (y < 0 && y < targetRotationalPosition.verticalAngle))
             {
-                if (targetRotationalPosition.verticalAngle < 90 && targetRotationalPosition.verticalAngle > -90)
+                if (targetRotationalPosition.horizontalAngle < 90 && targetRotationalPosition.horizontalAngle > -90)
                 {
-                    if (targetRotationalPosition.verticalAngle < 2 && targetRotationalPosition.verticalAngle > -2)
+                    if (targetRotationalPosition.verticalAngle < snapToTargetAngle && targetRotationalPosition.verticalAngle > -snapToTargetAngle)
                     {
                         y = -targetRotationalPosition.verticalAngle;
                     }
                 }
-            }
+            }      
 
         RotateTurret( new Vector3(y,x,0));       
     }
@@ -201,12 +135,14 @@ public class Turret_Controller : MonoBehaviour {
         Destroy(blast, 3.0f);
     }
 
-    IEnumerator FireTurret()
+   protected virtual IEnumerator FireTurret()
     {
         isfiring = true;
         canFire = false;
 
-        for( int i = 0; i < 3; i++)
+        yield return new WaitForSeconds(Random.Range(0f, 0.3f));
+
+        for ( int i = 0; i < 3; i++)
         {
             attemptFire();
 
@@ -221,11 +157,10 @@ public class Turret_Controller : MonoBehaviour {
         isfiring = false;  
     }
 
-    void AquireRandomTarget()
+   protected virtual void AquireRandomTarget()
     {
-        
-       // var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
-        var tempTarget = GameManager.instance.FindTargetForAIFighter(0);
+        // var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
+        var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
 
         if (tempTarget != null)
         {
@@ -235,11 +170,10 @@ public class Turret_Controller : MonoBehaviour {
             }
 
             target = tempTarget;
-        }
-
+        }        
     }
 
-    void AquireNextTarget()
+    protected void AquireNextTarget()
     {
         //Debug.Log("trying to find target");
        /* if (GameManager.instance.aiFighters.Length != 0)
@@ -272,22 +206,8 @@ public class Turret_Controller : MonoBehaviour {
         }
        // Debug.Log(target.transform.position - targetsLastPosition);
         Vector3 delta = target.transform.position - transform.position;
-        Vector3 vr = ((target.transform.position - targetsLastPosition) /*- ( transform.position - myFightersLastPosition)*/) / Time.deltaTime;
-
-        if (reactionTime > 0)
-        {
-            StartCoroutine(DelayedSetVR(vr));
-        }
-        else
-        {
-            delayedVR = vr;
-        }
-        //    ^
-        // super accurate version, but goes all over the place if we include the noted out code above. |
+        Vector3 vr = (target.transform.position - targetsLastPosition) / Time.deltaTime;       
         float t = AimAhead(delta, vr, 500);
-
-        //idea, add a reaction time coroutine to change VR with a delay.
-
 
         if (t > 0)
         {
@@ -300,10 +220,7 @@ public class Turret_Controller : MonoBehaviour {
             toReturn = target.transform.position;
         }
 
-
-        targetsLastPosition = target.transform.position;       
-        //Debug.Log(toReturn);
-
+        targetsLastPosition = target.transform.position;
         return toReturn;
     }
 
@@ -322,24 +239,15 @@ public class Turret_Controller : MonoBehaviour {
         else { return -1; }
     }
 
-    IEnumerator DelayedSetVR(Vector3 newVR)
-    {
-        yield return new WaitForSeconds(0.2f);
-
-        delayedVR = newVR;
-    }
-
-    IEnumerator SetDrift()
+   protected IEnumerator SetDrift()
     {
         while (true)
         {
-            drift.x = Random.Range(-accuracy, accuracy);
-            drift.y = Random.Range(-accuracy, accuracy);
-            drift.z = Random.Range(-accuracy, accuracy);
+            drift.x = Random.Range(-accuracy_Drift, accuracy_Drift);
+            drift.y = Random.Range(-accuracy_Drift, accuracy_Drift);
+            drift.z = Random.Range(-accuracy_Drift, accuracy_Drift);
 
             yield return new WaitForSeconds(5f);
         }
     }
-
-
 }

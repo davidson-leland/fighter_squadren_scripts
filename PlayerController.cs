@@ -418,10 +418,10 @@ public class PlayerController : FighterController{
         }
     }
 
-    public override void TakeDamage(int ammount)
+    public override void TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)
     {
         //Debug.Log("take it and like it");
-        base.TakeDamage(ammount);
+        base.TakeDamage(ammount, dType);
         canvasController.UpdateHealthBar(myFighter.health.hull, myFighter.health.sheilds);
     }
 }

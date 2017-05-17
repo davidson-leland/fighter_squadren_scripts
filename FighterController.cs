@@ -173,14 +173,14 @@ public class FighterController : MonoBehaviour {
         else { return -1; }
     }
 
-    public virtual void TakeDamage(int ammount)//need to move this to fighter script
+    public virtual void TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)//need to move this to fighter script
     {
         if (!myFighter.alive)
         {
             return;
         }
 
-        int healthCheck = myFighter.TakeDamage(ammount);
+        int healthCheck = myFighter.TakeDamage(ammount, dType);
 
         if (healthCheck <= 0)
         {

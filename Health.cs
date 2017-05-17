@@ -19,25 +19,66 @@ public class Health {
 
     public CanvasController canvasController;
 
-    public int TakeDamage(int ammount)
+    public int TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)
     {
         
-        sheilds -= ammount;
-            
-
-        if(sheilds < 0)
+        switch (dType)
         {
-            hull += sheilds;
+            case DamageType.DamageTypes.Default://Default
+                TakeDamage_Default(ammount);
+                break;
 
-            sheilds = 0;
+            case DamageType.DamageTypes.Direct://Direct
+                TakeDamage_Direct(ammount);
+                break;
 
-            if(hull < 0)
-            {
-                hull = 0;                
-            }
+            case DamageType.DamageTypes.ShieldsOnly://shields only
+                TakeDamage_ShieldsOnly(ammount);
+                break;
+
+            default:
+                TakeDamage_Default(ammount);
+                break;
         }
        
         return hull;
+    }
+
+    void TakeDamage_Default(int ammount)
+    {
+        int hullDamage = TakeDamage_ShieldsOnly(ammount);
+
+        TakeDamage_Direct(hullDamage);
+    }
+
+    void TakeDamage_Direct(int ammount)
+    {
+        hull -= ammount;
+
+        if (hull < 0)
+        {
+            hull = 0;
+        }
+    }
+
+    int TakeDamage_ShieldsOnly(int ammount)
+    {
+
+        if(sheilds == 0)
+        {
+            return ammount;
+        }
+
+        int remaningDamage = 0;
+        sheilds -= ammount;
+
+        if (sheilds < 0)
+        {
+            remaningDamage = sheilds * -1;
+            sheilds = 0;
+        }
+
+        return remaningDamage;
     }
 
     public IEnumerator RefreshSheilds()//will be controlled from fighter script

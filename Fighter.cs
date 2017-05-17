@@ -373,13 +373,13 @@ public class Fighter : MonoBehaviour {
         }
     }
 
-    public int TakeDamage(int ammount)//need to move this to fighter script
+    public int TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)//need to move this to fighter script
     {
         //return 1;
 
         if (alive)
         {
-            int newHull = health.TakeDamage(ammount);
+            int newHull = health.TakeDamage(ammount, dType);
 
 
             if (newHull > 0)

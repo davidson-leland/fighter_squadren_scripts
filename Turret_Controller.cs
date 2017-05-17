@@ -29,7 +29,7 @@ public class Turret_Controller : MonoBehaviour {
     protected bool isfiring = false;
 
     [SerializeField]
-    GameObject blastPrefab;
+    protected GameObject blastPrefab;
 
     protected Vector3 drift = new Vector3();
 
@@ -126,7 +126,7 @@ public class Turret_Controller : MonoBehaviour {
         rotator.Rotate(_rotate, Space.Self);
     }
 
-    protected void attemptFire()
+    protected virtual void attemptFire()
     {
         var blast = (GameObject)Instantiate(blastPrefab, gunPorts[0].position, gunPorts[0].rotation);
         var blastScript = blast.GetComponent<Projectile_Blast>();
@@ -152,7 +152,7 @@ public class Turret_Controller : MonoBehaviour {
         //attemptFire();
         //yield return new WaitForSeconds(0.1f);
 
-        yield return new WaitForSeconds(1f + Random.Range(0f, 0.3f));
+        yield return new WaitForSeconds(0);
         canFire = true;
         isfiring = false;  
     }

@@ -18,8 +18,8 @@ public class AnitShip_Turret_Controller : Turret_Controller
     [SerializeField]
     protected LineRenderer lineRenderer;
 
-    [SerializeField]
-    Transform targetindicator;
+    //[SerializeField]
+    //Transform targetindicator;
 
     protected override void TurretStart()
     {
@@ -231,7 +231,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
         //Debug.Log(targetPoint);
 
-        targetindicator.position = targetPoint;
+        //targetindicator.position = targetPoint;
 
         Vector3 compVector = transform.InverseTransformPoint(targetPoint);
         targetRotationalPosition.CalcAngles(compVector);

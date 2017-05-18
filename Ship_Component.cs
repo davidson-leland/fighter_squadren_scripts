@@ -4,7 +4,7 @@ using System.Collections;
 public class Ship_Component : MonoBehaviour {
 
 
-    public Health health = new Health();
+    public Health health;
 
     [System.NonSerialized]
     public Ship_Controller shipController;
@@ -16,7 +16,7 @@ public class Ship_Component : MonoBehaviour {
 
     protected virtual void ShipComponent_Start()
     {
-
+        health.SetStats();
     }
 	
 	// Update is called once per frame
@@ -32,6 +32,13 @@ public class Ship_Component : MonoBehaviour {
 
     public virtual void TakeDamage(int ammount, DamageType.DamageTypes dtype = DamageType.DamageTypes.Default)
     {
+
+        if(health.hull == 0)
+        {
+            //shipController.TakeDamage(ammount, DamageType.DamageTypes.Direct);//im wondering if we want these to be permenant holes in the shields or not.
+            return;
+        }
+
         int newhull = health.TakeDamage(ammount);
 
         if(newhull < 1)

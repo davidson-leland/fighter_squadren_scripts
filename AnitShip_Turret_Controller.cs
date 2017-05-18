@@ -21,6 +21,8 @@ public class AnitShip_Turret_Controller : Turret_Controller
     //[SerializeField]
     //Transform targetindicator;
 
+    bool performLineChecks = false;
+
     protected override void TurretStart()
     {
         canFire = false;
@@ -47,10 +49,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
                 }                
             }
         }
-        else
-        {
-            
-        }
+       
         
     }
 
@@ -166,10 +165,16 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
     protected override IEnumerator FireTurret()
     {
-        isfiring = true;
+       
         canFire = false;
+        isfiring = true;
 
         yield return new WaitForSeconds(0.3f);
+
+        performLineChecks = true;
+
+
+        StartCoroutine(CheckLaserDamage());
 
         distanceToEndPoint = Vector3.Distance(transform.position, targetPoint);
         //Debug.Log(distanceToEndPoint);
@@ -212,13 +217,47 @@ public class AnitShip_Turret_Controller : Turret_Controller
         lineRenderer.SetPosition(1, endPoint);
         lineRenderer.SetPosition(0, startPoint);
 
-        yield return new WaitForSeconds(2);
+        performLineChecks = false;
 
-        isfiring = false;
+        yield return new WaitForSeconds(2);
+        
         AquireRandomTarget();
         canFire = true;
+        isfiring = false;
     }
 
+    protected IEnumerator CheckLaserDamage()
+    {
+       
+        while (performLineChecks)
+        {            
+            yield return new WaitForSeconds(0.5f);
+
+            //performLine Checks
+
+            if(widthCurrent >= 1)
+            {
+                LineCheck(new Vector3(widthCurrent,widthCurrent), distanceToEndPoint);
+                LineCheck(new Vector3(widthCurrent, -widthCurrent), distanceToEndPoint);
+                LineCheck(new Vector3(-widthCurrent, widthCurrent), distanceToEndPoint);
+                LineCheck(new Vector3(-widthCurrent, -widthCurrent), distanceToEndPoint);
+            }
+            else
+            {
+                LineCheck(Vector3.zero, distanceToEndPoint);
+            }
+            
+
+        }
+
+    }
+
+    protected void LineCheck(Vector3 startPosition, float Length)
+    {
+        // do a line check, damage everything with health in the line.
+
+        startPosition += transform.position;
+    }
 
 
     protected override void AquireRandomTarget()

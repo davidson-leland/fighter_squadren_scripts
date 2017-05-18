@@ -19,6 +19,20 @@ public class Health {
 
     public CanvasController canvasController;
 
+    public Health()
+    {
+        //Debug.Log("is this work?");
+
+        hull = maxHull;
+        sheilds = maxSheilds;
+    }
+
+    public void SetStats()
+    {
+        hull = maxHull;
+        sheilds = maxSheilds;
+    }
+
     public int TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)
     {
         

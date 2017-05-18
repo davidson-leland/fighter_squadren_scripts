@@ -5,7 +5,7 @@ public class Ship_Controller : MonoBehaviour {
 
     // Use this for initialization
 
-    public Health health = new Health();
+    public Health health;
 
     public Ship_Component[] shipComponents;
 
@@ -19,12 +19,18 @@ public class Ship_Controller : MonoBehaviour {
 
 	void Start ()
     {
-	    
-	}
+        ShipStart();
+
+    }
 
     protected virtual void ShipStart()
     {
+        health.SetStats();
 
+        foreach (Ship_Component sc in shipComponents)
+        {
+            sc.shipController = this;
+        }
     }
 	
 	// Update is called once per frame
@@ -35,7 +41,18 @@ public class Ship_Controller : MonoBehaviour {
 
     protected virtual void ShipUpdate(float tick)
     {
+       /* Debug.Log("my health");
+        Debug.Log("h " + health.hull + " , s " + health.sheilds);
 
+        int i = 0;
+        foreach (Ship_Component sc in shipComponents)
+        {
+            Debug.Log(" component " + i + " health");
+            Debug.Log("h " + sc.health.hull + " , s " + sc.health.sheilds);
+            i++;
+        }
+
+        Debug.Log("======================================");*/
     }
 
     public virtual void TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)

@@ -11,7 +11,7 @@ public class DamageType  {
 
     public DamageTypes damageType;
 
-    public GameObject HitCollider(Collider other, string ownerName, int damage)
+    public GameObject HitCollider(Collider other, string ownerName, int damage, bool damageShip = true, bool damageComponent = true, bool damageFighter = true)
     {
         GameObject topLevel = other.gameObject;
 
@@ -20,7 +20,7 @@ public class DamageType  {
         while (!b)// i need to completly re-do this to take into account ship components.
         {
 
-            if (topLevel.tag == "Ship")
+            if (topLevel.tag == "Ship" && damageShip)
             {
                 if (topLevel.name != ownerName)
                 {
@@ -35,7 +35,7 @@ public class DamageType  {
                 b = true;
                
             }
-            else if (topLevel.tag == "Ship_Component")
+            else if (topLevel.tag == "Ship_Component" && damageComponent)
             {
 
                 if (topLevel.name != ownerName)
@@ -51,7 +51,7 @@ public class DamageType  {
                 b = true;
                
             }
-            else if (topLevel.tag == "Fighter" || topLevel.tag == "Player")
+            else if ((topLevel.tag == "Fighter" || topLevel.tag == "Player") && damageFighter)
             {
 
                 if (topLevel.name != ownerName)

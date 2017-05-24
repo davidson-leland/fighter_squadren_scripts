@@ -12,6 +12,8 @@ public class CruiseMissle_Launcher : MonoBehaviour {
 
     public Transform enemyShipTransform;
     public Vector3 shipSize;
+
+    public int team = 0;
     
     // Use this for initialization
 	void Start ()
@@ -43,6 +45,7 @@ public class CruiseMissle_Launcher : MonoBehaviour {
                 var spawnedOrdinance = (GameObject)Instantiate(missle_Prefab, launchPoints[i].position, launchPoints[i].rotation);
                 Cruise_Missle_Controller mController = spawnedOrdinance.GetComponent<Cruise_Missle_Controller>();
 
+                mController.team = team;
                 mController.target = enemyShipTransform;
                 mController.drift.x = Random.Range(-shipSize.x, shipSize.x);
                 mController.drift.y = Random.Range(-shipSize.y, shipSize.y);

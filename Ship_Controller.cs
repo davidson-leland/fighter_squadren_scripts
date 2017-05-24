@@ -7,6 +7,7 @@ public class Ship_Controller : MonoBehaviour {
 
     public Health health;
 
+   public int team = 0;
     public Ship_Component[] shipComponents;
 
     public enum ShipSize//today i learned about enums. im a big boy now!
@@ -30,6 +31,7 @@ public class Ship_Controller : MonoBehaviour {
         foreach (Ship_Component sc in shipComponents)
         {
             sc.shipController = this;
+            sc.team = team;
         }
     }
 	
@@ -37,6 +39,8 @@ public class Ship_Controller : MonoBehaviour {
 	void Update ()
     {
         ShipUpdate(Time.deltaTime);
+
+       // Debug.Log(" h = " + health.hull + ". s = " + health.sheilds);
 	}
 
     protected virtual void ShipUpdate(float tick)

@@ -5,6 +5,7 @@ public class Ship_Component : MonoBehaviour {
 
 
     public Health health;
+    public int team = 0;
 
     [System.NonSerialized]
     public Ship_Controller shipController;

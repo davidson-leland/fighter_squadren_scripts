@@ -7,7 +7,9 @@ public class GameManager : MonoBehaviour {
     public static GameManager instance = null;
 
     public List<FighterInformation>[] aiFighters = { new List<FighterInformation>(), new List<FighterInformation>(), new List<FighterInformation>()};
-    public List<FighterInformation>[] PlayerFighters = { new List<FighterInformation>(), new List<FighterInformation>(), new List<FighterInformation>() };
+    public List<FighterInformation>[] PlayerFighters = { new List<FighterInformation>(), new List<FighterInformation>(), new List<FighterInformation>()};
+
+    public List<Transform>[] CruiseMissles = { new List<Transform>(), new List<Transform>(), new List<Transform>()};
 
 
     void Awake()
@@ -99,6 +101,39 @@ public class GameManager : MonoBehaviour {
         int randomIndex = (int)Random.Range(0, aiFighters[i].Count - 0.1f);
 
         return aiFighters[i][randomIndex].fighterScript;
+    }
+
+    public void AddMissleToLists(int _team, Transform _transform)
+    {
+        CruiseMissles[_team].Add(_transform);
+    }
+
+    public void RemoveMissleFromLists( int _team, Transform _transform)
+    {
+        CruiseMissles[_team].Remove(CruiseMissles[_team].Find(x => x.transform == _transform));
+    }
+
+    public Transform CheckForMissles(int _team)
+    {
+        int i = 0;
+
+        if (i == _team)
+        {
+            i = 1;
+        }
+
+        if(CruiseMissles[i].Count == 0)
+        {
+            //Debug.Log("no missles");
+            return null;
+        }
+
+        int randomIndex = (int)Random.Range(0, CruiseMissles[i].Count - 0.1f);
+
+        //Debug.Log(CruiseMissles[i].Count + " missles");
+
+        return CruiseMissles[i][randomIndex];
+
     }
 
  }

@@ -214,7 +214,7 @@ public class Missle_controller : MonoBehaviour {
         Explode();
     }
 
-    protected void Explode(bool dealDamage = false)
+    protected virtual void Explode(bool dealDamage = false)
     {
        // Debug.Log("try explode");
         isExploding = true;

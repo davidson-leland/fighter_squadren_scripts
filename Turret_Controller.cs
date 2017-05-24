@@ -160,6 +160,8 @@ public class Turret_Controller : MonoBehaviour {
    protected virtual void AquireRandomTarget()
     {
         // var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
+
+
         var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
 
         if (tempTarget != null)
@@ -196,31 +198,27 @@ public class Turret_Controller : MonoBehaviour {
     }
 
 
-    protected Vector3 GetLead()
+    protected Vector3 GetLead( Vector3 _targetPosition)
     {
         Vector3 toReturn = new Vector3();
-
-        if (target == null)
-        {
-            return toReturn;
-        }
+        
        // Debug.Log(target.transform.position - targetsLastPosition);
-        Vector3 delta = target.transform.position - transform.position;
-        Vector3 vr = (target.transform.position - targetsLastPosition) / Time.deltaTime;       
+        Vector3 delta = _targetPosition - transform.position;
+        Vector3 vr = (_targetPosition - targetsLastPosition) / Time.deltaTime;       
         float t = AimAhead(delta, vr, 500);
 
         if (t > 0)
         {
            // Debug.Log("not accurate");
-            toReturn = target.transform.position + t * vr;
+            toReturn = _targetPosition + t * vr;
         }
         else
         {
 
-            toReturn = target.transform.position;
+            toReturn = _targetPosition;
         }
 
-        targetsLastPosition = target.transform.position;
+        targetsLastPosition = _targetPosition;
         return toReturn;
     }
 

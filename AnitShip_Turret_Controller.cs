@@ -18,6 +18,12 @@ public class AnitShip_Turret_Controller : Turret_Controller
     [SerializeField]
     protected LineRenderer lineRenderer;
 
+    [SerializeField]
+    protected DamageType damageType;
+
+    [SerializeField]
+    protected int damage = 2;
+
     //[SerializeField]
     //Transform targetindicator;
 
@@ -179,6 +185,11 @@ public class AnitShip_Turret_Controller : Turret_Controller
         distanceToEndPoint = Vector3.Distance(transform.position, targetPoint);
         //Debug.Log(distanceToEndPoint);
 
+        if (true)//eventually, if target has no shields, go all the way through target
+        {
+           // distanceToEndPoint *= 2000;
+        }
+
         endPoint.z = distanceToEndPoint;
         lineRenderer.SetPosition(1, endPoint);
 
@@ -199,7 +210,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
         yield return new WaitForSeconds(2f);
 
-
+        performLineChecks = false;
         while (widthCurrent > 0)
         {
             widthCurrent -= widthMax * 3 * Time.deltaTime;
@@ -207,6 +218,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
             yield return null;
         }
+       
 
         widthCurrent = 0;
         lineRenderer.SetWidth(widthCurrent, widthCurrent);
@@ -217,7 +229,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
         lineRenderer.SetPosition(1, endPoint);
         lineRenderer.SetPosition(0, startPoint);
 
-        performLineChecks = false;
+      
 
         yield return new WaitForSeconds(2);
         
@@ -228,35 +240,52 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
     protected IEnumerator CheckLaserDamage()
     {
-       
+        int dDealt = 0;
+
         while (performLineChecks)
         {            
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
 
             //performLine Checks
-
-            if(widthCurrent >= 1)
+            var dir = lineRenderer.transform.rotation * Vector3.forward;
+            if (widthCurrent >= 1)
             {
-                LineCheck(new Vector3(widthCurrent,widthCurrent), distanceToEndPoint);
-                LineCheck(new Vector3(widthCurrent, -widthCurrent), distanceToEndPoint);
-                LineCheck(new Vector3(-widthCurrent, widthCurrent), distanceToEndPoint);
-                LineCheck(new Vector3(-widthCurrent, -widthCurrent), distanceToEndPoint);
+                LineCheck(new Vector3(widthCurrent /2.3f,widthCurrent /2.3f), distanceToEndPoint, dir);
+                LineCheck(new Vector3(widthCurrent/ 2.3f, -widthCurrent/ 2.3f), distanceToEndPoint, dir);
+                LineCheck(new Vector3(-widthCurrent/ 2.3f, widthCurrent/ 2.3f), distanceToEndPoint, dir);
+                LineCheck(new Vector3(-widthCurrent/ 2.3f, -widthCurrent/ 2.3f), distanceToEndPoint, dir);
+
+                dDealt += damage * 4;
+                //Debug.Log("LargeLine");
             }
             else
             {
-                LineCheck(Vector3.zero, distanceToEndPoint);
-            }
-            
+                LineCheck(Vector3.zero, distanceToEndPoint, dir);
+                dDealt += damage;
+                //Debug.Log("tiny line");
+            }           
 
         }
 
+        //Debug.Log("damage dealt = " + dDealt);
+        
     }
 
-    protected void LineCheck(Vector3 startPosition, float Length)
+    protected void LineCheck(Vector3 startPosition, float Length , Vector3 dir)
     {
         // do a line check, damage everything with health in the line.
-
         startPosition += transform.position;
+        Vector3 endPosition = startPosition + (dir * Length);
+
+        RaycastHit[] Hits;
+        Hits = Physics.RaycastAll(startPosition, endPosition);
+
+        foreach(RaycastHit rH in Hits)
+        {
+            damageType.HitCollider(rH.collider, name, damage);
+        }
+           
+        //Debug.DrawLine(startPosition, endPosition,Color.green);
     }
 
 

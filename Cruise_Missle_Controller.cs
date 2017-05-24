@@ -6,15 +6,19 @@ public class Cruise_Missle_Controller : Missle_controller {
 
 
     public Vector3 drift = new Vector3();
+    public Health health;
+    public int team = 0;
 
 	// Use this for initialization
 	void Start () {
        
-        Invoke("SetCanExplode", 2);
+        Invoke("SetCanExplode", 2 + Random.Range(-0.5f, 0.5f));
         Invoke("IgniteMissle", timeToTopSpeed);
         directionMod = 0;
 
         currentSpeed = topSpeed;
+
+        GameManager.instance.AddMissleToLists(team, transform);
     }
 
 
@@ -114,7 +118,31 @@ public class Cruise_Missle_Controller : Missle_controller {
         {
             Missle_OnTriggerEnter(other);
         }
-
-       
     }
+
+    public void TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)
+    {
+        if(health.hull == 0)
+        {
+            return;
+        }
+
+        int healthCheck = health.TakeDamage(ammount, dType);
+
+        if (healthCheck <= 0)
+        {
+            //Destroy(gameObject);
+            Explode();
+
+            Debug.Log("blown by defenses");
+        }
+    }
+
+    protected override void Explode(bool dealDamage = false)
+    {
+        base.Explode(dealDamage);
+
+        GameManager.instance.RemoveMissleFromLists(team, transform);
+    }
+
 }

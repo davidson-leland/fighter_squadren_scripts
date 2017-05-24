@@ -64,8 +64,21 @@ public class DamageType  {
                     }
                 }
 
+                b = true;               
+            }
+            else if(topLevel.tag == "CruiseMissle")
+            {
+                if (topLevel.name != ownerName)
+                {
+                    var otherController = topLevel.GetComponent<Cruise_Missle_Controller>();
+
+                    if (otherController != null)
+                    {
+                        otherController.TakeDamage(damage, damageType);
+                    }
+                }
+
                 b = true;
-               
             }
 
             if (topLevel.transform.parent == null)

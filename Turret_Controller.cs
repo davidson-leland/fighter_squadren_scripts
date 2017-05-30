@@ -50,12 +50,18 @@ public class Turret_Controller : MonoBehaviour {
 	void Start ()
     {
         TurretStart();
+        Invoke("DelaySetTeam", 0.1f);
+    }
 
+    void DelaySetTeam()
+    {
+        team = component.team;
     }
 
     protected virtual void TurretStart()
     {
         StartCoroutine(SetDrift());
+       
     }
 	
 	// Update is called once per frame
@@ -171,7 +177,7 @@ public class Turret_Controller : MonoBehaviour {
     {
          //var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
          var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
-
+        
         if (tempTarget != null)
         {
             if (!isfiring)
@@ -253,7 +259,7 @@ public class Turret_Controller : MonoBehaviour {
             drift.y = Random.Range(-accuracy_Drift, accuracy_Drift);
             drift.z = Random.Range(-accuracy_Drift, accuracy_Drift);
 
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(5f);            
         }
     }
 }

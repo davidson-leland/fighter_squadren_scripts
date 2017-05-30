@@ -25,9 +25,9 @@ public class FighterController : MonoBehaviour {
 
     public int team;
     public bool isPlayer = false;
+    public bool isDead = false;
 
-
-   protected float reactionTime = 0f;
+    protected float reactionTime = 0f;
     Vector3 delayedVR;
 
     // Use this for initialization
@@ -71,7 +71,13 @@ public class FighterController : MonoBehaviour {
 
     protected void MoveFighter(Vector3 rotate, float speedMod)
     {
-        if(Time.timeScale == 0)
+        if (isDead)
+        {
+
+            return;
+        }
+
+        if (Time.timeScale == 0)
         {
             return;
         }
@@ -192,7 +198,9 @@ public class FighterController : MonoBehaviour {
 
     protected virtual void DestroyFighter()
     {
-        Destroy(gameObject);
+        GameManager.instance.fightersWaitingToRespawn[team].Add(this);
+        isDead = true;
+        Destroy(myFighter.gameObject);
     }
 
     IEnumerator DelayedSetVR(Vector3 newVR)
@@ -200,5 +208,10 @@ public class FighterController : MonoBehaviour {
         yield return new WaitForSeconds(0.2f);
 
         delayedVR = newVR;
+    }
+
+    public virtual void RespawnFighter()
+    {
+
     }
 }

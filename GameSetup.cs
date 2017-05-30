@@ -78,6 +78,35 @@ public class GameSetup : MonoBehaviour {
         }
     }
 
+    IEnumerator ReSpawnFighters(FighterController[] _Controllers)
+    {
+        
+        //Debug.Log("respawning shit");
+
+        if (_Controllers.Length != 0)
+        {
+            int i = 0;
+            int t = _Controllers[0].team;
+            foreach (FighterController fC in _Controllers)
+            {
+
+               // Debug.Log(fC.gameObject.name);
+                fC.RespawnFighter();
+
+                fC.transform.position = teamSpawns[t].spawnNodes[i].position;
+                fC.transform.rotation = teamSpawns[t].spawnNodes[i].rotation;
+                fC.isDead = false;
+
+                i++;
+                if (i >= teamSpawns[t].spawnNodes.Length)
+                {
+                    i = 0;
+                }
+                yield return new WaitForSeconds(0.2f);
+            }
+        }         
+    }
+
     IEnumerator RespawnTimer(float respawnTime)
     {
         while (true)//replace with something else in future
@@ -85,8 +114,11 @@ public class GameSetup : MonoBehaviour {
             yield return new WaitForSeconds(respawnTime);
 
            // Debug.Log("respawning fighters");
-           StartCoroutine( SpawnFighters(0, teamSize));
-           StartCoroutine( SpawnFighters(1, teamSize));
+           StartCoroutine( ReSpawnFighters(GameManager.instance.fightersWaitingToRespawn[0].ToArray()));
+           StartCoroutine( ReSpawnFighters(GameManager.instance.fightersWaitingToRespawn[1].ToArray()));
+
+            GameManager.instance.fightersWaitingToRespawn[0].Clear();
+            GameManager.instance.fightersWaitingToRespawn[1].Clear();
         }
     }
 }

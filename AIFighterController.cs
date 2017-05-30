@@ -30,12 +30,15 @@ public class AIFighterController : FighterController {
     public bool chaseTarget = false;
     bool canLooseTarget = false, loosingTarget = false;
 
+    public float accuracy_Drift = 30;
+    public Vector3 drift = new Vector3();
+
     protected override void FighterStart()
     {
         base.FighterStart();
 
         currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
-        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend, team);
+        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend, this,team);
 
         //currentTravelTarget = GameManager.instance.Hero_fighters[0].baseTransform;
         gameObject.name = "team-" + team + " " + gameObject.name + GameManager.instance.aiFighters[team].Count;
@@ -57,9 +60,20 @@ public class AIFighterController : FighterController {
         myFighter.transform.SetParent(transform);
     }
 
+    public override void RespawnFighter()
+    {
+        SpawnFighter();
+        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend, this, team);
+    }
+
 
     protected override void FighterUpdate()
     {
+        if (isDead)
+        {
+            return;
+        }
+
         base.FighterUpdate();
         adjustedStickSpeed = stickSpeed * Time.deltaTime;
         //myFighter.AttemptFireBlasters();
@@ -95,13 +109,13 @@ public class AIFighterController : FighterController {
             Vector3 targetLead = GetLead();
 
             distanceToTarget = Vector3.Distance(transform.position, targetLead);
-            compVector = CalcCompVector(targetLead);
+            compVector = CalcCompVector(targetLead + drift);
             //leadIndicator.transform.position = targetLead;
         }
         else
         {
             distanceToTarget = Vector3.Distance(transform.position, currentTravelTarget.position);
-            compVector = CalcCompVector(currentTravelTarget.position);
+            compVector = CalcCompVector(currentTravelTarget.position + drift);
         }
         
        
@@ -204,7 +218,7 @@ public class AIFighterController : FighterController {
             currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
             //Debug.Log("change targets");
 
-            if (Random.Range(0f, 10f) > 7)
+            if (Random.Range(0f, 10f) > 4)
             {
                 AquireRandomTarget();
                 chaseTarget = true;
@@ -262,6 +276,11 @@ public class AIFighterController : FighterController {
 
             currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
             //Debug.Log("lost target");
+
+        if(target.controller as PlayerController != null)
+            {
+                Debug.Log(" lost a atail");
+            }
         }
 
         loosingTarget = false;
@@ -272,15 +291,32 @@ public class AIFighterController : FighterController {
     {
         
         var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
-        
+               
         if(tempTarget == null)
         {
             chaseTarget = false;
         }
         else
         {
+            if (tempTarget.controller as PlayerController != null)
+            {
+                Debug.Log("you have a tail");
+            }
+
             target = tempTarget;
             chaseTarget = true;
+        }
+    }
+
+    protected IEnumerator SetDrift()
+    {
+        while (!isDead)
+        {
+            drift.x = Random.Range(-accuracy_Drift, accuracy_Drift);
+            drift.y = Random.Range(-accuracy_Drift, accuracy_Drift);
+            drift.z = Random.Range(-accuracy_Drift, accuracy_Drift);
+
+            yield return new WaitForSeconds(5f);
         }
     }
 }

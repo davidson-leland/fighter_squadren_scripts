@@ -80,16 +80,8 @@ public class Fighter : MonoBehaviour {
         else
         {
             oldAIControlls();//what we used to do
-        }
-        
-       /* lastPosition = transform.parent.position;
-        Debug.Log("when happens");*/
-
-        /*if(controller as AIFighterController != null)
-        {
-            Debug.Log("health " + health.hull + ". shields = " + health.sheilds);
-        }    */   
-
+        }       
+      
     }
     //holds old code for reference only
     void oldPlayerControlls()

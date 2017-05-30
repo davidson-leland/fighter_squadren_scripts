@@ -32,6 +32,11 @@ public class PlayerController : FighterController{
 
     protected override void FighterUpdate()
     {
+        if (isDead)
+        {
+            return;
+        }
+
         base.FighterUpdate();
 
         GetInput();
@@ -66,16 +71,10 @@ public class PlayerController : FighterController{
 
     protected override void SpawnFighter()
     {
-        var spawned = (GameObject)Instantiate(fighterPrefab,transform.position,transform.rotation);
-        myFighter = spawned.GetComponent<Fighter>();
-
-        isVisible = myFighter.testRend.isVisible;
-        myFighter.controller = this as PlayerController;
-        myFighter.transform.SetParent(transform);
-        myFighter.ActivateReticules();
+        CreateFighter();
 
         team = 0;
-        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, team);
+        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, this,team);
 
         //arrowController.gameObject.SetActive(false);
         //canvasTargetRet.gameObject.SetActive(false);
@@ -83,6 +82,23 @@ public class PlayerController : FighterController{
         canvasController.InitHealthBar(myFighter.health.hull, myFighter.health.sheilds);
         myFighter.health.canvasController = canvasController;
         isPlayer = true;    
+    }
+
+    public override void RespawnFighter()
+    {
+        CreateFighter();
+        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, this, team);
+    }
+
+    protected void CreateFighter()
+    {
+        var spawned = (GameObject)Instantiate(fighterPrefab, transform.position, transform.rotation);
+        myFighter = spawned.GetComponent<Fighter>();
+
+        isVisible = myFighter.testRend.isVisible;
+        myFighter.controller = this as PlayerController;
+        myFighter.transform.SetParent(transform);
+        myFighter.ActivateReticules();
     }
 
 

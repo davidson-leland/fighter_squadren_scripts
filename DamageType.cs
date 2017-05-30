@@ -56,13 +56,13 @@ public class DamageType  {
             }
             else if ((topLevel.tag == "Fighter" || topLevel.tag == "Player") && damageFighter)
             {
-
                 if (topLevel.name != ownerName)
                 {
                     var otherController = topLevel.GetComponent<FighterController>();
-
+                    
                     if (otherController != null && otherController.team != _team)
                     {
+                        
                         otherController.TakeDamage(damage, damageType);
                     }
                 }

@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour {
     public List<FighterInformation>[] PlayerFighters = { new List<FighterInformation>(), new List<FighterInformation>(), new List<FighterInformation>()};
 
     public List<Transform>[] CruiseMissles = { new List<Transform>(), new List<Transform>(), new List<Transform>()};
+    public List<FighterController>[] fightersWaitingToRespawn = { new List<FighterController>(), new List<FighterController>(), new List<FighterController>() };
 
 
     void Awake()
@@ -39,10 +40,10 @@ public class GameManager : MonoBehaviour {
        
 	}
    
-    public void AddEnemyFighterToList(Transform _transform, Fighter _fighter,Renderer _visible, int _team)
+    public void AddEnemyFighterToList(Transform _transform, Fighter _fighter,Renderer _visible, FighterController _fighterController, int _team)
     {
         //Debug.Log("adding to lists");
-        FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible);
+        FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible, _fighterController);
 
         aiFighters[_team].Add(newFighter);
 
@@ -58,9 +59,9 @@ public class GameManager : MonoBehaviour {
         //Debug.Log(Enemy_fighters.Count);         
     }
 
-    public void AddHeroFighterToList(Transform _transform, Fighter _fighter, Renderer _visible, int _team)
+    public void AddHeroFighterToList(Transform _transform, Fighter _fighter, Renderer _visible, FighterController _fighterController, int _team)
     {
-        FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible);
+        FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible, _fighterController);
 
         PlayerFighters[_team].Add(newFighter);
     }
@@ -93,13 +94,19 @@ public class GameManager : MonoBehaviour {
             i = 1;
         }
 
+
         if(aiFighters[i].Count == 0)
         {
             return null;
         }
 
-        int randomIndex = (int)Random.Range(0, aiFighters[i].Count - 0.1f);
+        int randomIndex = (int)Random.Range(0, aiFighters[i].Count + PlayerFighters[i].Count - 0.1f);
 
+       if(randomIndex >= aiFighters[i].Count)
+        {
+            randomIndex -= aiFighters[i].Count;
+            return PlayerFighters[i][randomIndex].fighterScript;
+        }
         return aiFighters[i][randomIndex].fighterScript;
     }
 
@@ -143,13 +150,15 @@ public struct FighterInformation
     public Transform baseTransform;
     public Fighter fighterScript;
     public Renderer renderer;
+    public FighterController fighterController;
 
 
-    public FighterInformation(Transform _transform, Fighter _fighterScript, Renderer  _visible)
+    public FighterInformation(Transform _transform, Fighter _fighterScript, Renderer  _visible, FighterController _fighterController)
     {
         baseTransform = _transform;
         fighterScript = _fighterScript;
         renderer = _visible;
+        fighterController = _fighterController;
     }
 }
 

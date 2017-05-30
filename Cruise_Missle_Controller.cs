@@ -62,7 +62,7 @@ public class Cruise_Missle_Controller : Missle_controller {
 
     void OnTriggerEnter(Collider other)
     {
-        if (!isExploding)
+        if (!isExploding && trackTarget)
         {
             GameObject topLevel = other.gameObject;
 
@@ -134,7 +134,7 @@ public class Cruise_Missle_Controller : Missle_controller {
             //Destroy(gameObject);
             Explode();
 
-            Debug.Log("blown by defenses");
+           // Debug.Log("blown by defenses");
         }
     }
 

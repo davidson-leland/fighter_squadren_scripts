@@ -21,7 +21,7 @@ public class GameSetup : MonoBehaviour {
     // Use this for initialization
 	void Start () {
 
-        //StartCoroutine(InitialSpawnFighters(0, teamSize));
+        StartCoroutine(InitialSpawnFighters(0, teamSize));
         StartCoroutine(InitialSpawnFighters(1, teamSize));
 
         StartCoroutine(RespawnTimer(20));
@@ -85,7 +85,7 @@ public class GameSetup : MonoBehaviour {
             yield return new WaitForSeconds(respawnTime);
 
            // Debug.Log("respawning fighters");
-         //  StartCoroutine( SpawnFighters(0, teamSize));
+           StartCoroutine( SpawnFighters(0, teamSize));
            StartCoroutine( SpawnFighters(1, teamSize));
         }
     }

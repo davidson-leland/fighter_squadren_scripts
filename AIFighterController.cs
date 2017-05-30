@@ -39,7 +39,7 @@ public class AIFighterController : FighterController {
 
         //currentTravelTarget = GameManager.instance.Hero_fighters[0].baseTransform;
         gameObject.name = "team-" + team + " " + gameObject.name + GameManager.instance.aiFighters[team].Count;
-        target = GameManager.instance.PlayerFighters[0][0].fighterScript;
+       // target = GameManager.instance.PlayerFighters[0][0].fighterScript;
 
        // leadIndicator = (GameObject)Instantiate(leadprefab);
 
@@ -89,7 +89,6 @@ public class AIFighterController : FighterController {
             {
                 //AquireRandomTarget();
                 chaseTarget = false;
-
                 currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
             }
 
@@ -207,8 +206,8 @@ public class AIFighterController : FighterController {
 
             if (Random.Range(0f, 10f) > 7)
             {
-                //AquireRandomTarget();
-                //chaseTarget = true;
+                AquireRandomTarget();
+                chaseTarget = true;
             }
                 
         }

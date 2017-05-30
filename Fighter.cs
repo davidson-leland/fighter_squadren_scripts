@@ -289,6 +289,7 @@ public class Fighter : MonoBehaviour {
         blastScript.speed += topSpeed;
         blastScript.owner = this;
         blastScript.ownerName = controller.gameObject.name;
+        blastScript.team = controller.team;
         //blast.name = ("EnergyBlast" + gameObject);
         Destroy(blast, 3.0f);
     }   

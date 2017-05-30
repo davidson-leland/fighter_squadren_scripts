@@ -7,6 +7,10 @@ public class Ship_Component : MonoBehaviour {
     public Health health;
     public int team = 0;
 
+    public GameObject[] partsToHide;//will be the game objects to hide when component is destroyed.
+
+    public GameObject[] destroyEffects;// effects to play when compenent is destroyed.
+
     [System.NonSerialized]
     public Ship_Controller shipController;
     // Use this for initialization
@@ -44,7 +48,17 @@ public class Ship_Component : MonoBehaviour {
 
         if(newhull < 1)
         {
-            shipController.TakeDamage(health.maxHull, DamageType.DamageTypes.Direct);            
+            shipController.TakeDamage(health.maxHull, DamageType.DamageTypes.Direct); 
+            
+            foreach(GameObject gO in partsToHide)
+            {
+                gO.SetActive(false);
+            } 
+
+            foreach( GameObject gO in destroyEffects)
+            {
+                gO.SetActive(true);
+            }
         }
     }
 }

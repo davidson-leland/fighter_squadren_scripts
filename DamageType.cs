@@ -11,8 +11,11 @@ public class DamageType  {
 
     public DamageTypes damageType;
 
-    public GameObject HitCollider(Collider other, string ownerName, int damage, bool damageShip = true, bool damageComponent = true, bool damageFighter = true)
+    public int team;
+
+    public GameObject HitCollider(Collider other, string ownerName, int _team ,int damage, bool damageShip = true, bool damageComponent = true, bool damageFighter = true)
     {
+       
         GameObject topLevel = other.gameObject;
 
         bool b = false;       
@@ -26,7 +29,7 @@ public class DamageType  {
                 {
                     var otherController = topLevel.GetComponent<Ship_Controller>();
 
-                    if (otherController != null)
+                    if (otherController != null && otherController.team != _team)
                     {
                         otherController.TakeDamage(damage, damageType);
                     }
@@ -42,7 +45,7 @@ public class DamageType  {
                 {
                     var otherController = topLevel.GetComponent<Ship_Component>();
 
-                    if (otherController != null)
+                    if (otherController != null && otherController.team != _team)
                     {
                         otherController.TakeDamage(damage,damageType);
                     }
@@ -58,7 +61,7 @@ public class DamageType  {
                 {
                     var otherController = topLevel.GetComponent<FighterController>();
 
-                    if (otherController != null)
+                    if (otherController != null && otherController.team != _team)
                     {
                         otherController.TakeDamage(damage, damageType);
                     }

@@ -282,7 +282,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
         foreach(RaycastHit rH in Hits)
         {
-            damageType.HitCollider(rH.collider, name, damage);
+            damageType.HitCollider(rH.collider, name, team,damage);
         }
            
         //Debug.DrawLine(startPosition, endPosition,Color.green);

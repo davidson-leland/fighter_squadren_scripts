@@ -20,8 +20,6 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
                 }                
             }
         }
-
-        
     }
 
 
@@ -46,12 +44,14 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
         var blast = (GameObject)Instantiate(blastPrefab, gunPorts[0].position, gunPorts[0].rotation);
         var blastScript = blast.GetComponent<Projectile_Blast>();
         blastScript.ownerName = gameObject.name;
+        blastScript.team = team;
         //blast.name = ("EnergyBlast" + gameObject);
         Destroy(blast, 15.0f);
 
         blast = (GameObject)Instantiate(blastPrefab, gunPorts[1].position, gunPorts[1].rotation);
         blastScript = blast.GetComponent<Projectile_Blast>();
         blastScript.ownerName = gameObject.name;
+        blastScript.team = team;
         Destroy(blast, 15.0f);
     }
 

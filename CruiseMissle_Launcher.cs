@@ -13,6 +13,9 @@ public class CruiseMissle_Launcher : MonoBehaviour {
     public Transform enemyShipTransform;
     public Vector3 shipSize;
 
+    [SerializeField]
+    protected Ship_Component component;
+
     public int team = 0;
     
     // Use this for initialization
@@ -24,7 +27,11 @@ public class CruiseMissle_Launcher : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        MissleLauncherUpdate(Time.deltaTime);
+
+        if(component.health.hull > 0)
+        {
+            MissleLauncherUpdate(Time.deltaTime);
+        }       
 
     }
 
@@ -37,7 +44,7 @@ public class CruiseMissle_Launcher : MonoBehaviour {
     {
         yield return new WaitForSeconds(2);
 
-        while (true)
+        while (component.health.hull > 0)
         {          
 
             for (int i = 0; i < launchPoints.Length; i++)

@@ -36,6 +36,9 @@ public class Turret_Controller : MonoBehaviour {
     [SerializeField]
     protected float accuracy_Drift = 30f;
 
+    [SerializeField]
+    protected Ship_Component component;
+
 
    // int targetIndex = 0;
 
@@ -57,9 +60,15 @@ public class Turret_Controller : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update ()
-    {   
-        TurretUpdate(Time.deltaTime);
-	}
+    {
+
+        if(component != null && component.health.hull != 0)
+        {
+            TurretUpdate(Time.deltaTime);
+        }
+
+       // TurretUpdate(Time.deltaTime);
+    }
 
     //used individually in the child classes
     protected virtual void TurretUpdate(float tick)//im going to operate on the assumption that this will be faster than accessing time.deltatime everytine i need it.
@@ -131,6 +140,7 @@ public class Turret_Controller : MonoBehaviour {
         var blast = (GameObject)Instantiate(blastPrefab, gunPorts[0].position, gunPorts[0].rotation);
         var blastScript = blast.GetComponent<Projectile_Blast>();
         blastScript.ownerName = gameObject.name;
+        blastScript.team = team;
         //blast.name = ("EnergyBlast" + gameObject);
         Destroy(blast, 3.0f);
     }
@@ -159,10 +169,8 @@ public class Turret_Controller : MonoBehaviour {
 
    protected virtual void AquireRandomTarget()
     {
-        // var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
-
-
-        var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
+         //var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
+         var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
 
         if (tempTarget != null)
         {

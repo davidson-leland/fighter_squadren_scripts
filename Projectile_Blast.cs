@@ -14,6 +14,8 @@ public class Projectile_Blast : MonoBehaviour {
 
 
     public DamageType damageType;
+
+    public int team;
     
     // Use this for initialization
 	void Start () {
@@ -106,7 +108,7 @@ public class Projectile_Blast : MonoBehaviour {
 
          //Debug.Log(topLevel);*/
 
-        GameObject topLevel = damageType.HitCollider(other, ownerName, damage);
+        GameObject topLevel = damageType.HitCollider(other, ownerName, team, damage);
 
         if (topLevel.name != ownerName)
         {

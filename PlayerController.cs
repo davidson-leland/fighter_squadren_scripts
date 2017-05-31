@@ -25,6 +25,7 @@ public class PlayerController : FighterController{
     float turnY = 0, turnX = 0;//turning parameters. most important for holding a turn.
 
     bool usePauseMenu = false;
+    bool initspawn = false;
 
     [SerializeField]
     GameObject PauseMenu;
@@ -65,35 +66,48 @@ public class PlayerController : FighterController{
         {
             canvasTargetRet.position = new Vector2(-100, -100);
         }
-
-
     }
 
     protected override void SpawnFighter()
     {
-        CreateFighter();
+        //CreateFighter();
+        isDead = true;
 
         team = 0;
-        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, this,team);
+        
+        GameManager.instance.fightersWaitingToRespawn[team].Add(this);       
+        isPlayer = true;          
+    }
 
-        //arrowController.gameObject.SetActive(false);
-        //canvasTargetRet.gameObject.SetActive(false);
-
-        canvasController.InitHealthBar(myFighter.health.hull, myFighter.health.sheilds);
-        myFighter.health.canvasController = canvasController;
-        isPlayer = true;    
+    public void InitialSpawnFighter()
+    {
+        GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, this, team);        
+        initspawn = true;
     }
 
     public override void RespawnFighter()
     {
         CreateFighter();
+
+        if (!initspawn)
+        {
+            InitialSpawnFighter();
+        }       
         GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, this, team);
+        
+
+        
     }
 
     protected void CreateFighter()
     {
         var spawned = (GameObject)Instantiate(fighterPrefab, transform.position, transform.rotation);
         myFighter = spawned.GetComponent<Fighter>();
+
+        myFighter.health.canvasController = canvasController;
+        myFighter.health.SetStats();
+        canvasController.InitHealthBar(myFighter.health.hull, myFighter.health.sheilds);
+        
 
         isVisible = myFighter.testRend.isVisible;
         myFighter.controller = this as PlayerController;
@@ -362,8 +376,6 @@ public class PlayerController : FighterController{
                     lockTime = 0;
                 }
             }
-
-            //Debug.Log(targetList.Count);
             
             PositionTargetLocks(targetLockReticules, targetList);
 
@@ -439,6 +451,12 @@ public class PlayerController : FighterController{
         //Debug.Log("take it and like it");
         base.TakeDamage(ammount, dType);
         canvasController.UpdateHealthBar(myFighter.health.hull, myFighter.health.sheilds);
+    }
+
+    protected override void DestroyFighter()
+    {
+        isDead = true;
+        Destroy(myFighter.gameObject);
     }
 }
 

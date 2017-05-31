@@ -19,6 +19,8 @@ public class Health {
 
     public CanvasController canvasController;
 
+    public GameObject sheildMesh;
+
     public Health()
     {
         //Debug.Log("is this work?");
@@ -92,6 +94,11 @@ public class Health {
             sheilds = 0;
         }
 
+        if(sheildMesh != null && sheilds < 1)
+        {
+            sheildMesh.SetActive(false);
+        }
+
         return remaningDamage;
     }
 
@@ -109,8 +116,13 @@ public class Health {
             {               
                 sheilds++;
                 currentRefresh = currentRefresh - shieldRefreshRate;
-                
-                if(canvasController != null)
+
+                if (sheildMesh != null)
+                {
+                    sheildMesh.SetActive(true);
+                }
+
+                if (canvasController != null)
                 {
                     canvasController.UpdateHealthBar(hull, sheilds);
                 }        

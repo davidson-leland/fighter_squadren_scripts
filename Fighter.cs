@@ -56,13 +56,12 @@ public class Fighter : MonoBehaviour {
 
         HideShield();
 
-        /*if (!testControl)
+        health.SetStats();
+
+        if(shieldMesh != null)
         {
-            currentTarget = testCourse[Random.Range(0, testCourse.Length  )];
-            GameManager.instance.AddEnemyFighterToList(transform.parent, this,testRend);
-            
-            //SetStraight();
-        }*/
+            health.sheildMesh = shieldMesh.gameObject;
+        }
     }
 	
 	// Update is called once per frame
@@ -278,15 +277,16 @@ public class Fighter : MonoBehaviour {
     {
         var blast = (GameObject)Instantiate(blastPrefab, gunPorts[portNum].position, transform.rotation);
         var blastScript = blast.GetComponent<Projectile_Blast>();
+
         blastScript.speed += topSpeed;
         blastScript.owner = this;
         blastScript.ownerName = controller.gameObject.name;
         blastScript.team = controller.team;
-        //blast.name = ("EnergyBlast" + gameObject);
+
         Destroy(blast, 3.0f);
     }   
 
-    void OnTriggerEnter(Collider other)
+   /* void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.name == "EnergyBlast(Clone)") 
         {
@@ -297,7 +297,7 @@ public class Fighter : MonoBehaviour {
                 ShowSheild();
             }            
         }        
-    }
+    }*/
 
     void OnCollisionEnter(Collision collision)
     {
@@ -308,6 +308,7 @@ public class Fighter : MonoBehaviour {
 
     void ShowSheild()
     {
+        
         CancelInvoke("HideShield");
 
         shieldMesh.enabled = true;
@@ -325,11 +326,7 @@ public class Fighter : MonoBehaviour {
         if ( timeSinceLastFire > fireRate)
         {
             timeSinceLastFire = 0;
-
             AttemptFire(firePortNum);
-
-            //FireOrdinance(speedToUse, currentTarget);//for fun only
-
             firePortNum++;
 
             if (firePortNum >= gunPorts.Length)
@@ -337,20 +334,17 @@ public class Fighter : MonoBehaviour {
                 firePortNum = 0;
             }
         }
-
     }
 
 
-    public void FireOrdinance(float _speed, Transform _target)
+    public virtual void FireOrdinance(float _speed, Transform _target)
     {
         if(ordinancePrefab != null)
         {
             var spawnedOrdinance = (GameObject)Instantiate(ordinancePrefab, transform.position, transform.rotation);
-
             Missle_controller mController = spawnedOrdinance.GetComponent<Missle_controller>();
 
             mController.currentSpeed = _speed;
-
             mController.target = _target;
             mController.directionMod = directionMod;
 
@@ -372,6 +366,12 @@ public class Fighter : MonoBehaviour {
 
         if (alive)
         {
+            if (health.sheilds > 0)
+            {
+                ShowSheild();   
+            }
+
+
             int newHull = health.TakeDamage(ammount, dType);
 
 
@@ -381,7 +381,8 @@ public class Fighter : MonoBehaviour {
                 {
                     StopCoroutine(healthCo);
                 }
-                healthCo = StartCoroutine(health.RefreshSheilds());
+                healthCo = StartCoroutine(health.RefreshSheilds());              
+
             }
             else
             {

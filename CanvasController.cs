@@ -14,6 +14,7 @@ public class CanvasController : MonoBehaviour {
 
     [SerializeField]
     RectTransform healthBarBackground;
+    
 
     [SerializeField]
     GameObject healthBlipPrefab;
@@ -49,6 +50,11 @@ public class CanvasController : MonoBehaviour {
 
     public void InitHealthBar(int hull, int shields)
     {
+        if(healthBlips != null)
+        {
+            ClearHealthBar();
+        }
+
         int totalHealth = hull + shields;
         healthBarBackground.sizeDelta = new Vector2(70, 30 * (totalHealth) + 10);
 
@@ -73,6 +79,14 @@ public class CanvasController : MonoBehaviour {
                 healthBlips[i].image.color = shieldColor;
             }
         }
+    }
+
+    public void ClearHealthBar()
+    {
+        foreach(HealthBlip hB in healthBlips)
+        {
+            Destroy(hB.rectTransform.gameObject);
+        }       
     }
 
     public void UpdateHealthBar(int newHull, int newShields)

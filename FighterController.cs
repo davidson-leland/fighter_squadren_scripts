@@ -198,7 +198,7 @@ public class FighterController : MonoBehaviour {
 
     protected virtual void DestroyFighter()
     {
-        GameManager.instance.fightersWaitingToRespawn[team].Add(this);
+        EnterRespawnQueue();
         isDead = true;
         Destroy(myFighter.gameObject);
     }
@@ -213,5 +213,10 @@ public class FighterController : MonoBehaviour {
     public virtual void RespawnFighter()
     {
 
+    }
+
+    protected void EnterRespawnQueue()
+    {
+        GameManager.instance.fightersWaitingToRespawn[team].Add(this);
     }
 }

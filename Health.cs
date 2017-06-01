@@ -14,7 +14,8 @@ public class Health {
 
     [System.NonSerialized]
     public float currentRefresh = 0f;
-
+    
+    //was going to use for possible ui feature
     public float refreshNormalised { get { return currentRefresh / shieldRefreshRate ; } }
 
     public CanvasController canvasController;
@@ -23,8 +24,6 @@ public class Health {
 
     public Health()
     {
-        //Debug.Log("is this work?");
-
         hull = maxHull;
         sheilds = maxSheilds;
     }
@@ -37,7 +36,6 @@ public class Health {
 
     public int TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)
     {
-        
         switch (dType)
         {
             case DamageType.DamageTypes.Default://Default
@@ -63,7 +61,6 @@ public class Health {
     void TakeDamage_Default(int ammount)
     {
         int hullDamage = TakeDamage_ShieldsOnly(ammount);
-
         TakeDamage_Direct(hullDamage);
     }
 
@@ -79,7 +76,6 @@ public class Health {
 
     int TakeDamage_ShieldsOnly(int ammount)
     {
-
         if(sheilds == 0)
         {
             return ammount;
@@ -107,6 +103,7 @@ public class Health {
         yield return new WaitForSeconds(shieldRefreshDelay);
 
         float t  = 0f;
+
         while (sheilds < maxSheilds)
         {
             currentRefresh += Time.deltaTime;
@@ -130,8 +127,5 @@ public class Health {
 
             yield return null;
         }
-        float x = shieldRefreshRate * maxSheilds;
-        //Debug.Log(t + ", should be equal to " + x);
     }
-	
 }

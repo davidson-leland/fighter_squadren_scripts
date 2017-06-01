@@ -5,9 +5,9 @@ public class AnitShip_Turret_Controller : Turret_Controller
 {
     [SerializeField]
     protected Transform EnemyShipOrigin;
+
     [SerializeField]
     protected Vector3 EnemyShipSize;
-
     protected Vector3 targetPoint = new Vector3();
 
     protected float distanceToEndPoint;
@@ -23,9 +23,6 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
     [SerializeField]
     protected int damage = 2;
-
-    //[SerializeField]
-    //Transform targetindicator;
 
     bool performLineChecks = false;
 
@@ -43,7 +40,6 @@ public class AnitShip_Turret_Controller : Turret_Controller
             TrackTarget(tick, targetPoint);
         }
 
-
         if (targetRotationalPosition.horizontalAngle < 1 && targetRotationalPosition.horizontalAngle > -1)
         {
             if (targetRotationalPosition.verticalAngle < 1 && targetRotationalPosition.verticalAngle > -1)
@@ -51,149 +47,31 @@ public class AnitShip_Turret_Controller : Turret_Controller
                 if(canFire && !isfiring)
                 {
                     StartCoroutine(FireTurret());
-                    //Debug.Log("shoot");
                 }                
             }
         }
-       
-        
     }
-
-
-    /*protected override IEnumerator FireTurret()
-    {
-        isfiring = true;
-        canFire = false;
-
-        yield return new WaitForSeconds(0.3f);
-
-        distanceToEndPoint = Vector3.Distance(transform.position, targetPoint);
-        //Debug.Log(distanceToEndPoint);
-
-        while(endPoint.z < distanceToEndPoint)
-        {
-            endPoint.z += 20000 * Time.deltaTime;
-
-            if(endPoint.z > distanceToEndPoint)
-            {
-                endPoint.z = distanceToEndPoint;
-            }
-
-            lineRenderer.SetPosition(1, endPoint);
-
-            if(widthCurrent < widthMax)
-            {
-                widthCurrent += widthMax * 3 * Time.deltaTime;
-
-                if(widthCurrent > widthMax)
-                {
-                    widthMax = widthCurrent;
-                }
-
-                lineRenderer.SetWidth(widthCurrent, widthCurrent);
-            }
-
-            yield return null;
-        }
-
-        //yield return new WaitForSeconds(2);
-
-        float t = 0;
-        while( t < 2f)
-        {
-            t += Time.deltaTime;
-
-            if (widthCurrent < widthMax)
-            {
-                widthCurrent += widthMax * 3 * Time.deltaTime;
-
-                if (widthCurrent > widthMax)
-                {
-                    widthCurrent = widthMax;
-                }
-                lineRenderer.SetWidth(widthCurrent, widthCurrent);
-            }
-
-            yield return null;
-        }
-
-
-        while (widthCurrent > 7)
-        {
-            widthCurrent -= widthMax * 3 * Time.deltaTime;
-            lineRenderer.SetWidth(widthCurrent, widthCurrent);
-
-            yield return null;
-        }
-
-        while (startPoint.z < distanceToEndPoint)
-        {
-            startPoint.z += 20000 * Time.deltaTime;
-
-            if (startPoint.z > distanceToEndPoint)
-            {
-                endPoint.z = distanceToEndPoint;
-            }
-
-            lineRenderer.SetPosition(0, startPoint);
-
-            if(widthCurrent > 0)
-            {
-                widthCurrent -= widthMax * 3 * Time.deltaTime;
-
-                if(widthCurrent < 0)
-                {
-                    widthCurrent = 0;
-                }
-
-                lineRenderer.SetWidth(widthCurrent, widthCurrent);
-            }
-            yield return null;
-        }
-        widthCurrent = 0;
-        lineRenderer.SetWidth(widthCurrent, widthCurrent);
-
-        startPoint.z = 0;
-        endPoint.z = 0;
-
-        lineRenderer.SetPosition(1, endPoint);
-        lineRenderer.SetPosition(0, startPoint);        
-
-        yield return new WaitForSeconds(2);
-
-        isfiring = false;
-        AquireRandomTarget();
-
-
-        canFire = true;
-    }*/
-
 
     protected override IEnumerator FireTurret()
     {
-       
         canFire = false;
         isfiring = true;
 
         yield return new WaitForSeconds(0.3f);
 
         performLineChecks = true;
-
-
         StartCoroutine(CheckLaserDamage());
 
         distanceToEndPoint = Vector3.Distance(transform.position, targetPoint);
-        //Debug.Log(distanceToEndPoint);
 
+        /*
         if (true)//eventually, if target has no shields, go all the way through target
         {
            // distanceToEndPoint *= 2000;
-        }
+        }*/
 
         endPoint.z = distanceToEndPoint;
         lineRenderer.SetPosition(1, endPoint);
-
-        //yield return new WaitForSeconds(2);
 
         while (widthCurrent < widthMax)
         {
@@ -203,33 +81,35 @@ public class AnitShip_Turret_Controller : Turret_Controller
             {
                 widthCurrent = widthMax;
             }
-            lineRenderer.SetWidth(widthCurrent, widthCurrent);
+            
+            lineRenderer.startWidth = widthCurrent;
+            lineRenderer.endWidth = widthCurrent;
             yield return null;
         }
 
-
         yield return new WaitForSeconds(2f);
-
         performLineChecks = false;
+
         while (widthCurrent > 0)
         {
             widthCurrent -= widthMax * 3 * Time.deltaTime;
-            lineRenderer.SetWidth(widthCurrent, widthCurrent);
+           
+            lineRenderer.startWidth = widthCurrent;
+            lineRenderer.endWidth = widthCurrent;
 
             yield return null;
         }
-       
 
         widthCurrent = 0;
-        lineRenderer.SetWidth(widthCurrent, widthCurrent);
+        
+        lineRenderer.startWidth = widthCurrent;
+        lineRenderer.endWidth = widthCurrent;
 
         startPoint.z = 0;
         endPoint.z = 0;
 
         lineRenderer.SetPosition(1, endPoint);
         lineRenderer.SetPosition(0, startPoint);
-
-      
 
         yield return new WaitForSeconds(2);
         
@@ -240,8 +120,6 @@ public class AnitShip_Turret_Controller : Turret_Controller
 
     protected IEnumerator CheckLaserDamage()
     {
-        int dDealt = 0;
-
         while (performLineChecks)
         {            
             yield return new WaitForSeconds(0.3f);
@@ -254,21 +132,12 @@ public class AnitShip_Turret_Controller : Turret_Controller
                 LineCheck(new Vector3(widthCurrent/ 2.3f, -widthCurrent/ 2.3f), distanceToEndPoint, dir);
                 LineCheck(new Vector3(-widthCurrent/ 2.3f, widthCurrent/ 2.3f), distanceToEndPoint, dir);
                 LineCheck(new Vector3(-widthCurrent/ 2.3f, -widthCurrent/ 2.3f), distanceToEndPoint, dir);
-
-                dDealt += damage * 4;
-                //Debug.Log("LargeLine");
             }
             else
             {
                 LineCheck(Vector3.zero, distanceToEndPoint, dir);
-                dDealt += damage;
-                //Debug.Log("tiny line");
-            }           
-
+            }  
         }
-
-        //Debug.Log("damage dealt = " + dDealt);
-        
     }
 
     protected void LineCheck(Vector3 startPosition, float Length , Vector3 dir)
@@ -284,10 +153,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
         {
             damageType.HitCollider(rH.collider, name, team,damage);
         }
-           
-        //Debug.DrawLine(startPosition, endPosition,Color.green);
     }
-
 
     protected override void AquireRandomTarget()
     {
@@ -297,13 +163,7 @@ public class AnitShip_Turret_Controller : Turret_Controller
         targetPoint.y += Random.Range(-EnemyShipSize.y, EnemyShipSize.y);
         targetPoint.z += Random.Range(-EnemyShipSize.z, EnemyShipSize.z);
 
-        //Debug.Log(targetPoint);
-
-        //targetindicator.position = targetPoint;
-
         Vector3 compVector = transform.InverseTransformPoint(targetPoint);
         targetRotationalPosition.CalcAngles(compVector);
-
-        //canFire = true;
     }
 }

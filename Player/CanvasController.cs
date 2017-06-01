@@ -14,15 +14,20 @@ public class CanvasController : MonoBehaviour {
 
     [SerializeField]
     RectTransform healthBarBackground;
-    
 
     [SerializeField]
     GameObject healthBlipPrefab;
 
+    [SerializeField]
+    GameObject spawnMenu;
+
+    [SerializeField]
+    Text spawnText;
+
     struct HealthBlip
     {
         public string type;
-       public RectTransform rectTransform;
+        public RectTransform rectTransform;
         public Image image;
 
         public HealthBlip(string _type, RectTransform _rectTransform, Image _image)
@@ -38,16 +43,7 @@ public class CanvasController : MonoBehaviour {
     [SerializeField]
     PlayerController playerOwner;
 
-    // Use this for initialization
-    void Start () {
-        
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
+    //create player health bar there is a glitch in here somewhere i will have to figure out later.
     public void InitHealthBar(int hull, int shields)
     {
         if(healthBlips != null)
@@ -91,22 +87,19 @@ public class CanvasController : MonoBehaviour {
 
     public void UpdateHealthBar(int newHull, int newShields)
     {
-        //Debug.Log(newHull + "____" + newShields);
         for (int i = 0; i < healthBlips.Length; i++)
         {
-            if(i < playerOwner.fighterHealth.hull)
+            if(i < playerOwner.myFighter.health.hull)
             {
                 if( i + 1 > newHull)
                 {
-                    //Debug.Log("test2");
                     healthBlips[i].image.color = hullBrokenColor;
                 }
             }
             else
             {
-                if( i - playerOwner.fighterHealth.maxHull + 1 > newShields)
+                if( i - playerOwner.myFighter.health.maxHull + 1 > newShields)
                 {
-                    //Debug.Log("test3");
                     healthBlips[i].image.color = shieldBrokenColor;
                 }
                 else
@@ -115,5 +108,15 @@ public class CanvasController : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public void ShowSpawnMenu(bool showMenu)
+    {
+        spawnMenu.SetActive(showMenu);
+    }
+
+    public void SetSpawnText(string inString)
+    {
+        spawnText.text = "Spawn As : " + inString;
     }
 }

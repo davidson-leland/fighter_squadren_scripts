@@ -39,13 +39,6 @@ public class Turret_Controller : MonoBehaviour {
     [SerializeField]
     protected Ship_Component component;
 
-
-   // int targetIndex = 0;
-
-   
-
-    //public Transform leadIndicator;
-
 	// Use this for initialization
 	void Start ()
     {
@@ -61,19 +54,15 @@ public class Turret_Controller : MonoBehaviour {
     protected virtual void TurretStart()
     {
         StartCoroutine(SetDrift());
-       
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
-
         if(component != null && component.health.hull != 0)
         {
             TurretUpdate(Time.deltaTime);
         }
-
-       // TurretUpdate(Time.deltaTime);
     }
 
     //used individually in the child classes
@@ -86,8 +75,6 @@ public class Turret_Controller : MonoBehaviour {
     {
         Vector3 compVector = rotator.InverseTransformPoint(toTrack);
         targetRotationalPosition.CalcAngles(compVector);
-
-        //Debug.Log(targetRotationalPosition.horizontalAngle);
 
         float desiredAngleX = 0;
         float desiredAngleY = 0;
@@ -147,7 +134,7 @@ public class Turret_Controller : MonoBehaviour {
         var blastScript = blast.GetComponent<Projectile_Blast>();
         blastScript.ownerName = gameObject.name;
         blastScript.team = team;
-        //blast.name = ("EnergyBlast" + gameObject);
+        //blast.name = ("EnergyBlast" + gameObject);//???
         Destroy(blast, 3.0f);
     }
 
@@ -165,9 +152,6 @@ public class Turret_Controller : MonoBehaviour {
             yield return new WaitForSeconds(0.3f);
         }
 
-        //attemptFire();
-        //yield return new WaitForSeconds(0.1f);
-
         yield return new WaitForSeconds(0);
         canFire = true;
         isfiring = false;  
@@ -175,8 +159,7 @@ public class Turret_Controller : MonoBehaviour {
 
    protected virtual void AquireRandomTarget()
     {
-         //var tempTarget = GameManager.instance.PlayerFighters[0][0].fighterScript;
-         var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
+        var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
         
         if (tempTarget != null)
         {
@@ -189,46 +172,20 @@ public class Turret_Controller : MonoBehaviour {
         }        
     }
 
-    protected void AquireNextTarget()
-    {
-        //Debug.Log("trying to find target");
-       /* if (GameManager.instance.aiFighters.Length != 0)
-        {
-            //Debug.Log("are fighters");
-            if (GameManager.instance.aiFighters[1].Count > 0)
-            {
-               // Debug.Log("looking for enemy fighter");
-               target = GameManager.instance.aiFighters[1][targetIndex].fighterScript;
-
-                targetIndex++;
-
-                if (targetIndex >= GameManager.instance.aiFighters[1].Count)
-                {
-                    targetIndex = 0;
-                }
-            }
-        }*/
-        
-    }
-
-
     protected Vector3 GetLead( Vector3 _targetPosition)
     {
         Vector3 toReturn = new Vector3();
-        
-       // Debug.Log(target.transform.position - targetsLastPosition);
+
         Vector3 delta = _targetPosition - transform.position;
         Vector3 vr = (_targetPosition - targetsLastPosition) / Time.deltaTime;       
         float t = AimAhead(delta, vr, 500);
 
         if (t > 0)
         {
-           // Debug.Log("not accurate");
             toReturn = _targetPosition + t * vr;
         }
         else
         {
-
             toReturn = _targetPosition;
         }
 

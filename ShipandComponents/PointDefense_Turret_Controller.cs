@@ -7,17 +7,13 @@ public class PointDefense_Turret_Controller : Turret_Controller
 
     protected override void TurretUpdate(float tick)
     {
-        
         if (target == null && missleTransform == null)
         {
             AquireRandomTarget();
         }
 
-        //Debug.Log(missleTransform);
-
         if (target != null || missleTransform != null)
         {
-           
             Vector3 targetPosition = new Vector3();
 
             if (missleTransform != null)
@@ -41,24 +37,17 @@ public class PointDefense_Turret_Controller : Turret_Controller
                     && (targetRotationalPosition.verticalAngle < angleMax && targetRotationalPosition.verticalAngle > -angleMax))
                 {
                     Vector3 targetLead = GetLead(targetPosition) + drift;
-
-                    TrackTarget(tick, targetLead);
-
-                    //Debug.Log(distanceToTarget);                    
+                    TrackTarget(tick, targetLead);               
 
                     if (distanceToTarget < 1500 && canFire && !isfiring)
                     {
-                        //Debug.Log("try fire turret");
-
                          if (targetRotationalPosition.verticalAngle < 10 && targetRotationalPosition.verticalAngle > -10)
                          {
                              if (targetRotationalPosition.verticalAngle < 10 && targetRotationalPosition.verticalAngle > -10)
                              {
                                  StartCoroutine(FireTurret());
                              }
-                         }   
-
-                        //StartCoroutine(FireTurret());
+                         }  
                     }
                 }
                 else

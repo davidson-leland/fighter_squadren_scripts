@@ -14,17 +14,15 @@ public class Cruise_Missle_Controller : Missle_controller {
        
         Invoke("SetCanExplode", 2 + Random.Range(-0.5f, 0.5f));
         Invoke("IgniteMissle", timeToTopSpeed);
-        directionMod = 0;
 
+        directionMod = 0;
         currentSpeed = topSpeed;
 
         GameManager.instance.AddMissleToLists(team, transform);
     }
 
-
     protected override void Missle_Update()
     {
-
         if(currentSpeed < topSpeed)
         {
             currentSpeed += topSpeed * (Time.deltaTime / timeToTopSpeed);
@@ -34,12 +32,6 @@ public class Cruise_Missle_Controller : Missle_controller {
                 currentSpeed = topSpeed;
             }
         }
-       
-
-        /*if (currentSpeed >= topSpeed)
-        {
-            IgniteMissle();
-        }*/
 
         base.Missle_Update();
     }
@@ -68,12 +60,11 @@ public class Cruise_Missle_Controller : Missle_controller {
 
             bool b = false;
 
-            while (!b)// i need to completly re-do this to take into account ship components.
+            while (!b)
             {
 
                 if (topLevel.tag == "Ship")
                 {
-
                     var otherController = topLevel.GetComponent<Ship_Controller>();
 
                     if (otherController != null)
@@ -82,14 +73,11 @@ public class Cruise_Missle_Controller : Missle_controller {
                     }
 
                     b = true;
-
                     Explode();
 
                 }
                 else if (topLevel.tag == "Ship_Component")
                 {
-
-
                     var otherController = topLevel.GetComponent<Ship_Component>();
 
                     if (otherController != null)
@@ -98,9 +86,7 @@ public class Cruise_Missle_Controller : Missle_controller {
                     }
 
                     b = true;
-
                     Explode();
-
                 }
 
                 if (topLevel.transform.parent == null)
@@ -131,17 +117,13 @@ public class Cruise_Missle_Controller : Missle_controller {
 
         if (healthCheck <= 0)
         {
-            //Destroy(gameObject);
             Explode();
-
-           // Debug.Log("blown by defenses");
         }
     }
 
     protected override void Explode(bool dealDamage = false)
     {
         base.Explode(dealDamage);
-
         GameManager.instance.RemoveMissleFromLists(team, transform);
     }
 

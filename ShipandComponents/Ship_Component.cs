@@ -13,6 +13,7 @@ public class Ship_Component : MonoBehaviour {
 
     [System.NonSerialized]
     public Ship_Controller shipController;
+
     // Use this for initialization
     void Start ()
     {
@@ -37,7 +38,6 @@ public class Ship_Component : MonoBehaviour {
 
     public virtual void TakeDamage(int ammount, DamageType.DamageTypes dtype = DamageType.DamageTypes.Default)
     {
-
         if(health.hull == 0)
         {
             //shipController.TakeDamage(ammount, DamageType.DamageTypes.Direct);//im wondering if we want these to be permenant holes in the shields or not.

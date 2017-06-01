@@ -3,11 +3,9 @@ using System.Collections;
 
 public class Ship_Controller : MonoBehaviour {
 
-    // Use this for initialization
-
     public Health health;
 
-   public int team = 0;
+    public int team = 0;
     public Ship_Component[] shipComponents;
 
     public enum ShipSize//today i learned about enums. im a big boy now!
@@ -21,7 +19,6 @@ public class Ship_Controller : MonoBehaviour {
 	void Start ()
     {
         ShipStart();
-
     }
 
     protected virtual void ShipStart()
@@ -39,24 +36,11 @@ public class Ship_Controller : MonoBehaviour {
 	void Update ()
     {
         ShipUpdate(Time.deltaTime);
-
-       // Debug.Log(" h = " + health.hull + ". s = " + health.sheilds);
 	}
 
     protected virtual void ShipUpdate(float tick)
     {
-       /* Debug.Log("my health");
-        Debug.Log("h " + health.hull + " , s " + health.sheilds);
-
-        int i = 0;
-        foreach (Ship_Component sc in shipComponents)
-        {
-            Debug.Log(" component " + i + " health");
-            Debug.Log("h " + sc.health.hull + " , s " + sc.health.sheilds);
-            i++;
-        }
-
-        Debug.Log("======================================");*/
+      
     }
 
     public virtual void TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)

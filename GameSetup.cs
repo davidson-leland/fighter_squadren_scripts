@@ -10,6 +10,8 @@ public class GameSetup : MonoBehaviour {
 
     public int teamSize = 10;
     
+    //much of what is happening here needs to be moved over to the game manager.
+
     void Awake()
     {
         if(GameManager.instance == null)
@@ -19,7 +21,8 @@ public class GameSetup : MonoBehaviour {
     }
     
     // Use this for initialization
-	void Start () {
+	void Start ()
+    {
 
         StartCoroutine(InitialSpawnFighters(0, teamSize));
         StartCoroutine(InitialSpawnFighters(1, teamSize));
@@ -29,7 +32,8 @@ public class GameSetup : MonoBehaviour {
     
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
 	
 	}
 
@@ -40,7 +44,6 @@ public class GameSetup : MonoBehaviour {
 
         fighter.testCourse = testcourse;
         fighter.team = _team;
-
     }
 
     public void ExitGame()
@@ -51,16 +54,12 @@ public class GameSetup : MonoBehaviour {
     IEnumerator InitialSpawnFighters( int _team, int _teamSize)
     {
         yield return new WaitForSeconds(0.5f);
-
         StartCoroutine(SpawnFighters(_team, _teamSize));               
     }
 
     IEnumerator SpawnFighters(int _team, int _teamSize)
     {
-        //Debug.Log("spawn fighters called");
         int spawned = GameManager.instance.aiFighters[_team].Count;
-
-        //Debug.Log("spawned fighters = " + spawned);
 
         while (spawned < _teamSize)
         {
@@ -69,10 +68,10 @@ public class GameSetup : MonoBehaviour {
 
                 if (spawned < _teamSize)
                 {
-                    //Debug.Log("spawning fighter");
                     SpawnAIFighter(_team, teamSpawns[_team].spawnNodes[i]);
                     spawned++;
                 }
+
                 yield return new WaitForSeconds(0.2f);
             }
         }
@@ -80,17 +79,13 @@ public class GameSetup : MonoBehaviour {
 
     IEnumerator ReSpawnFighters(FighterController[] _Controllers)
     {
-        
-        //Debug.Log("respawning shit");
-
         if (_Controllers.Length != 0)
         {
             int i = 0;
             int t = _Controllers[0].team;
+
             foreach (FighterController fC in _Controllers)
             {
-
-               // Debug.Log(fC.gameObject.name);
                 fC.RespawnFighter();
 
                 fC.transform.position = teamSpawns[t].spawnNodes[i].position;
@@ -98,10 +93,12 @@ public class GameSetup : MonoBehaviour {
                 fC.isDead = false;
 
                 i++;
+
                 if (i >= teamSpawns[t].spawnNodes.Length)
                 {
                     i = 0;
                 }
+
                 yield return new WaitForSeconds(0.2f);
             }
         }         
@@ -112,10 +109,9 @@ public class GameSetup : MonoBehaviour {
         while (true)//replace with something else in future
         {
             yield return new WaitForSeconds(respawnTime);
-
-           // Debug.Log("respawning fighters");
-           StartCoroutine( ReSpawnFighters(GameManager.instance.fightersWaitingToRespawn[0].ToArray()));
-           StartCoroutine( ReSpawnFighters(GameManager.instance.fightersWaitingToRespawn[1].ToArray()));
+            
+            StartCoroutine( ReSpawnFighters(GameManager.instance.fightersWaitingToRespawn[0].ToArray()));
+            StartCoroutine( ReSpawnFighters(GameManager.instance.fightersWaitingToRespawn[1].ToArray()));
 
             GameManager.instance.fightersWaitingToRespawn[0].Clear();
             GameManager.instance.fightersWaitingToRespawn[1].Clear();

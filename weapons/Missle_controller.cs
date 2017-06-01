@@ -16,13 +16,11 @@ public class Missle_controller : MonoBehaviour {
 
     public int directionMod = 1;
 
-    float turnAngle = 0f, lastAnglex = 360, lastAngley = 360;
+    float lastAnglex = 360, lastAngley = 360;
 
     protected bool canExplode = true, zonedIn = false, hasExploded = false;
 
     protected bool isExploding = false;
-
-
 
     RotationalPosition targetRotationalPosition = new RotationalPosition();
 
@@ -30,11 +28,11 @@ public class Missle_controller : MonoBehaviour {
     SphereCollider sphereCollider;
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
         Invoke("IgniteMissle", igniteTimer);
         Invoke("TimedExplosion", lifeTimer);
         Invoke("SetCanExplode", 2);
-
     }
 
     // Update is called once per frame
@@ -53,16 +51,13 @@ public class Missle_controller : MonoBehaviour {
         Vector3 movement = Vector3.forward;
         movement *= currentSpeed * Time.deltaTime;
 
-
         if (trackTarget)
         {
             float x = 0, y = 0;
 
             if (target != null)
             {
-
                 float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                //Debug.Log(distanceToTarget);
 
                 if (distanceToTarget < 50 && canExplode)
                 {
@@ -144,13 +139,11 @@ public class Missle_controller : MonoBehaviour {
             lastAnglex = targetRotationalPosition.horizontalAngle;
             lastAngley = targetRotationalPosition.verticalAngle;
 
-
             if (zonedIn == false)//if target is in a 20 degree cone, this is for tracking if we eventually lose the target for some reason.
             {
                 if ((lastAnglex > -20 && lastAnglex < 20) && (lastAngley > -20 && lastAngley < 20))
                 {
                     zonedIn = true;
-                    //Debug.Log("zonedIn");
                 }
             }
         }
@@ -174,14 +167,11 @@ public class Missle_controller : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        //Debug.Log(other.transform);
-
         Missle_OnTriggerEnter(other);
     }
 
     protected virtual void Missle_OnTriggerEnter(Collider other)
     {
-
         if (!canExplode)
         {
             return;
@@ -206,7 +196,6 @@ public class Missle_controller : MonoBehaviour {
     {
         trackTarget = true;
         exhaustEffect.SetActive(true);
-        //currentSpeed = topSpeed;
     }
 
     void TimedExplosion()
@@ -216,7 +205,6 @@ public class Missle_controller : MonoBehaviour {
 
     protected virtual void Explode(bool dealDamage = false)
     {
-       // Debug.Log("try explode");
         isExploding = true;
 
         var blast = (GameObject)Instantiate(explosionEffect, transform.position, transform.rotation);

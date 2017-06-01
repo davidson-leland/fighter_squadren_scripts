@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour {
     public List<Transform>[] CruiseMissles = { new List<Transform>(), new List<Transform>(), new List<Transform>()};
     public List<FighterController>[] fightersWaitingToRespawn = { new List<FighterController>(), new List<FighterController>(), new List<FighterController>() };
 
-
     void Awake()
     {
         if(instance == null)
@@ -28,7 +27,6 @@ public class GameManager : MonoBehaviour {
         }
     }
     
-    
     // Use this for initialization
 	void Start () {
        
@@ -42,27 +40,18 @@ public class GameManager : MonoBehaviour {
    
     public void AddEnemyFighterToList(Transform _transform, Fighter _fighter,Renderer _visible, FighterController _fighterController, int _team)
     {
-        //Debug.Log("adding to lists");
         FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible, _fighterController);
-
         aiFighters[_team].Add(newFighter);
-
-       // Enemy_fighters[Enemy_fighters.Count].baseTransform.gameObject.name = "enemy_" + Enemy_fighters.Count;
     }
 
     public void RemoveEnemyFighterFromLists(Fighter _fighter, int _team)
     {
-        //Debug.Log(Enemy_fighters.FindIndex(x => x.fighterScript == _fighter));
-
         aiFighters[_team].Remove(aiFighters[_team].Find(x => x.fighterScript == _fighter));
-
-        //Debug.Log(Enemy_fighters.Count);         
     }
 
     public void AddHeroFighterToList(Transform _transform, Fighter _fighter, Renderer _visible, FighterController _fighterController, int _team)
     {
         FighterInformation newFighter = new FighterInformation(_transform, _fighter, _visible, _fighterController);
-
         PlayerFighters[_team].Add(newFighter);
     }
 
@@ -72,14 +61,10 @@ public class GameManager : MonoBehaviour {
 
         foreach (FighterInformation fI in aiFighters[_team])
         {
-           // Debug.Log(fI.renderer.isVisible);
-
             if (fI.renderer.isVisible)
             {
                 toSend.Add(fI.baseTransform);
-
             }
-
         }
 
         return toSend;
@@ -94,7 +79,6 @@ public class GameManager : MonoBehaviour {
             i = 1;
         }
 
-
         if(aiFighters[i].Count == 0)
         {
             return null;
@@ -102,11 +86,12 @@ public class GameManager : MonoBehaviour {
 
         int randomIndex = (int)Random.Range(0, aiFighters[i].Count + PlayerFighters[i].Count - 0.1f);
 
-       if(randomIndex >= aiFighters[i].Count)
+        if(randomIndex >= aiFighters[i].Count)
         {
             randomIndex -= aiFighters[i].Count;
             return PlayerFighters[i][randomIndex].fighterScript;
         }
+
         return aiFighters[i][randomIndex].fighterScript;
     }
 
@@ -131,18 +116,13 @@ public class GameManager : MonoBehaviour {
 
         if(CruiseMissles[i].Count == 0)
         {
-            //Debug.Log("no missles");
             return null;
         }
 
         int randomIndex = (int)Random.Range(0, CruiseMissles[i].Count - 0.1f);
 
-        //Debug.Log(CruiseMissles[i].Count + " missles");
-
         return CruiseMissles[i][randomIndex];
-
     }
-
  }
 
 public struct FighterInformation
@@ -151,7 +131,6 @@ public struct FighterInformation
     public Fighter fighterScript;
     public Renderer renderer;
     public FighterController fighterController;
-
 
     public FighterInformation(Transform _transform, Fighter _fighterScript, Renderer  _visible, FighterController _fighterController)
     {

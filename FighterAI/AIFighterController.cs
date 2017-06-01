@@ -7,12 +7,6 @@ public class AIFighterController : FighterController {
    
     public Transform[] testCourse;
 
-    Vector3 previousvector = new Vector3();
-    Vector3 currentTargetLead = new Vector3();
-
-    const float newLeadTime = 0.1f;
-    float currentLeadTime = 00.5f;
-
     float turnAngle = 0f;
     float pitchAngle = 0f;
 
@@ -25,8 +19,6 @@ public class AIFighterController : FighterController {
 
     public Vector3[] previousLeadPoints = new Vector3[0];
 
-    Vector3 delayedTargetLead = new Vector3();
-
     public bool chaseTarget = false;
     bool canLooseTarget = false, loosingTarget = false;
 
@@ -38,21 +30,17 @@ public class AIFighterController : FighterController {
         base.FighterStart();
 
         currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
-        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend, this,team);
-
-        //currentTravelTarget = GameManager.instance.Hero_fighters[0].baseTransform;
-        gameObject.name = "team-" + team + " " + gameObject.name + GameManager.instance.aiFighters[team].Count;
-       // target = GameManager.instance.PlayerFighters[0][0].fighterScript;
-
-       // leadIndicator = (GameObject)Instantiate(leadprefab);
-
+        GameManager.instance.AddEnemyFighterToList(transform, myFighter, myFighter.testRend, this,team);       
+        gameObject.name = "team-" + team + " " + gameObject.name + GameManager.instance.aiFighters[team].Count;      
         reactionTime = aiReactionTime;
+
+        StartCoroutine(SetDrift());
 
     }
 
     protected override void SpawnFighter()
     {
-        var spawned = (GameObject)Instantiate(fighterPrefab, transform.position, transform.rotation);
+        var spawned = (GameObject)Instantiate(fighterPrefab[1], transform.position, transform.rotation);
         myFighter = spawned.GetComponent<Fighter>();
 
         isVisible = myFighter.testRend.isVisible;
@@ -76,13 +64,12 @@ public class AIFighterController : FighterController {
 
         base.FighterUpdate();
         adjustedStickSpeed = stickSpeed * Time.deltaTime;
-        //myFighter.AttemptFireBlasters();
+        
         CalcAITurn();
     }
 
     void CalcAITurn()
     {
-       
         float distanceToTarget = 10000f;
         Vector3 compVector = new Vector3();
 
@@ -96,12 +83,10 @@ public class AIFighterController : FighterController {
             modMaxTurnAngle *= 0.5f;
         }
 
-
         if (chaseTarget)
         {
             if(target == null)//if we no longer have valid target go back to patrolling
             {
-                //AquireRandomTarget();
                 chaseTarget = false;
                 currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
             }
@@ -110,15 +95,13 @@ public class AIFighterController : FighterController {
 
             distanceToTarget = Vector3.Distance(transform.position, targetLead);
             compVector = CalcCompVector(targetLead + drift);
-            //leadIndicator.transform.position = targetLead;
         }
         else
         {
             distanceToTarget = Vector3.Distance(transform.position, currentTravelTarget.position);
             compVector = CalcCompVector(currentTravelTarget.position + drift);
         }
-        
-       
+
         targetRotationalPosition.CalcAngles(compVector);
 
         float desiredPitchAngle = 0;
@@ -149,8 +132,6 @@ public class AIFighterController : FighterController {
             // first lets center vertical rotation back to zero. later on we can set v rotation based on height of target.
             float currentvAngle = transform.rotation.eulerAngles.x;
 
-            //Debug.Log(currentvAngle);
-
             if(currentvAngle > 180 && currentvAngle < 350)
             {
                 desiredPitchAngle = modMaxPitchAngle;
@@ -159,7 +140,6 @@ public class AIFighterController : FighterController {
             {
                 desiredPitchAngle = -modMaxPitchAngle;
             }
-
         }
 
         if (distanceToTarget < 1000f && chaseTarget)
@@ -183,7 +163,6 @@ public class AIFighterController : FighterController {
                 }
             }
         }
-
 
         turnAngle = AdjustAngle(desiredTurnAngle, turnAngle);
         pitchAngle = AdjustAngle(desiredPitchAngle, pitchAngle);       
@@ -216,14 +195,12 @@ public class AIFighterController : FighterController {
         if (distanceToTarget <= 50f)
         {
             currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
-            //Debug.Log("change targets");
-
+            
             if (Random.Range(0f, 10f) > 4)
             {
                 AquireRandomTarget();
                 chaseTarget = true;
-            }
-                
+            }  
         }
 
         MoveFighter(new Vector3(y, x, 0), 1);
@@ -255,14 +232,7 @@ public class AIFighterController : FighterController {
     protected override void DestroyFighter()
     {
         GameManager.instance.RemoveEnemyFighterFromLists(myFighter, team);
-
         base.DestroyFighter();
-    }
-
-    IEnumerator DelayedSetAimTargetLocation(Vector3 newLead)
-    {
-        yield return new WaitForSeconds(0.2f);
-        delayedTargetLead = newLead;
     }
 
     IEnumerator AttemptFindTarget(float AttemptTime)
@@ -273,9 +243,7 @@ public class AIFighterController : FighterController {
         if (targetRotationalPosition.horizontalAngle < -60 || targetRotationalPosition.horizontalAngle > 60 || targetRotationalPosition.verticalAngle < -60 || targetRotationalPosition.verticalAngle > 60)
         {
             chaseTarget = false;
-
             currentTravelTarget = testCourse[Random.Range(0, testCourse.Length)];
-            //Debug.Log("lost target");
 
         if(target.controller as PlayerController != null)
             {
@@ -289,7 +257,6 @@ public class AIFighterController : FighterController {
 
     public void AquireRandomTarget()
     {
-        
         var tempTarget = GameManager.instance.FindTargetForAIFighter(team);
                
         if(tempTarget == null)

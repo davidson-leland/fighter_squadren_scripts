@@ -24,7 +24,6 @@ public class RotationalPosition {
         angleY = FindAngle(new Vector2(_aLocalVector.y, _aLocalVector.z));
     }
 
-
     float FindAngle(Vector2 inVector)//the function to find the angles
     {
         if (inVector.x == 0 && inVector.y < 0)

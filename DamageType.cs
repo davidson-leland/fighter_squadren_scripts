@@ -2,7 +2,8 @@
 using System.Collections;
 
 [System.Serializable]
-public class DamageType  {
+public class DamageType
+{
 
 	public enum DamageTypes
     {
@@ -15,14 +16,11 @@ public class DamageType  {
 
     public GameObject HitCollider(Collider other, string ownerName, int _team ,int damage, bool damageShip = true, bool damageComponent = true, bool damageFighter = true)
     {
-       
         GameObject topLevel = other.gameObject;
-
         bool b = false;       
 
         while (!b)// i need to completly re-do this to take into account ship components.
         {
-
             if (topLevel.tag == "Ship" && damageShip)
             {
                 if (topLevel.name != ownerName)
@@ -36,11 +34,9 @@ public class DamageType  {
                 }
 
                 b = true;
-               
             }
             else if (topLevel.tag == "Ship_Component" && damageComponent)
             {
-
                 if (topLevel.name != ownerName)
                 {
                     var otherController = topLevel.GetComponent<Ship_Component>();
@@ -62,7 +58,6 @@ public class DamageType  {
                     
                     if (otherController != null && otherController.team != _team)
                     {
-                        
                         otherController.TakeDamage(damage, damageType);
                     }
                 }
@@ -92,7 +87,6 @@ public class DamageType  {
             {
                 topLevel = topLevel.transform.parent.gameObject;
             }
-            //break;
         }
 
         return topLevel;

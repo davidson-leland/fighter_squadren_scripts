@@ -19,7 +19,6 @@ public class PlayerController : FighterController{
     [SerializeField]
     protected ArrowController arrowController;//this is the pointer that locks ontu your current target
 
-
     Transform tempTarget; //currently this is placeholder untill i redo the targeting mechanics. which will come after splitting the fighter controller
 
     float turnY = 0, turnX = 0;//turning parameters. most important for holding a turn.
@@ -30,6 +29,8 @@ public class PlayerController : FighterController{
     [SerializeField]
     GameObject PauseMenu;
 
+    [SerializeField]
+    protected int selectedFighterIndex;
 
     protected override void FighterUpdate()
     {
@@ -70,13 +71,12 @@ public class PlayerController : FighterController{
 
     protected override void SpawnFighter()
     {
-        //CreateFighter();
         isDead = true;
+        team = 0; 
+        isPlayer = true;
 
-        team = 0;
-        
-        GameManager.instance.fightersWaitingToRespawn[team].Add(this);       
-        isPlayer = true;          
+        selectedFighterIndex = 1;
+        ShowSpawnMenu();
     }
 
     public void InitialSpawnFighter()
@@ -92,29 +92,25 @@ public class PlayerController : FighterController{
         if (!initspawn)
         {
             InitialSpawnFighter();
-        }       
+        } 
+              
         GameManager.instance.AddHeroFighterToList(transform, myFighter, myFighter.testRend, this, team);
-        
-
-        
     }
 
     protected void CreateFighter()
     {
-        var spawned = (GameObject)Instantiate(fighterPrefab, transform.position, transform.rotation);
+        var spawned = (GameObject)Instantiate(fighterPrefab[selectedFighterIndex], transform.position, transform.rotation);
         myFighter = spawned.GetComponent<Fighter>();
 
         myFighter.health.canvasController = canvasController;
         myFighter.health.SetStats();
         canvasController.InitHealthBar(myFighter.health.hull, myFighter.health.sheilds);
-        
 
         isVisible = myFighter.testRend.isVisible;
         myFighter.controller = this as PlayerController;
         myFighter.transform.SetParent(transform);
         myFighter.ActivateReticules();
     }
-
 
     void GetInput()
     {
@@ -123,7 +119,6 @@ public class PlayerController : FighterController{
 
         var newCameraPosition = new Vector3();
         var actualCameraPosition = mainCamera.transform.localPosition;
-        //var tempRotation = myFighter.transform.localRotation.eulerAngles;
 
         float desiredCameraX = 15 * desiredX;
         float desiredCameraY = (-5 * desiredY) + 16;
@@ -174,14 +169,6 @@ public class PlayerController : FighterController{
         {
             newCameraPosition.y = desiredCameraY;
         }
-        
-
-        /*tempRotation.x = 5f * desiredY;
-        tempRotation.y = 5 * desiredX;
-        tempRotation.z = 0;*/
-
-        //myFighter.transform.localRotation = Quaternion.Euler(tempRotation);//during eventual replication onto networked games remove this rotation.
-       
 
         float x = CalculateTurnRate(desiredX, ref turnX);
         float y = CalculateTurnRate(desiredY, ref turnY);
@@ -191,12 +178,10 @@ public class PlayerController : FighterController{
         if (Input.GetAxis("Brake") == 1)
         {
             speedMod *= 0.3f;
-            //z = -8;was used to handle camera movment
         }
         else if (Input.GetAxis("Boost") == 1)
         {
             speedMod *= 1.6f;
-            //z = -18;was used to handle camera movement
         }
 
         if (speedMod > 1)
@@ -254,15 +239,12 @@ public class PlayerController : FighterController{
         {
             SwapHud(!usePauseMenu);
         }
-
     }
 
     float CalculateTurnRate(float desiredRate, ref float lastRate)
     {
         float toReturn = desiredRate;
         float turnRate = 50;
-
-        //Debug.Log(lastRate);
 
         if (desiredRate >= 1 || desiredRate <= -1)
         {
@@ -275,16 +257,11 @@ public class PlayerController : FighterController{
         }
         else if (lastRate > 50)
         {
-            //Debug.Log("ting ting");
             turnRate = lastRate - (100 * Time.deltaTime);
-
         }
+
         lastRate = turnRate;
-
-        //Debug.Log(turnRate);
         toReturn = turnRate * desiredRate * Time.deltaTime;
-
-        //Debug.Log(toReturn);
 
         return toReturn;
     }
@@ -305,7 +282,6 @@ public class PlayerController : FighterController{
             }
 
             tempFTarget = tempTarget;
-            //Debug.Log(newT);
         }
 
         if (tempTarget != null)
@@ -322,8 +298,6 @@ public class PlayerController : FighterController{
     {
         float lockTime = 0;
 
-        //Debug.Log("rawr");
-
         List<Transform> targetList = new List<Transform>();
         List<RectTransform> targetLockReticules = new List<RectTransform>();
 
@@ -332,8 +306,7 @@ public class PlayerController : FighterController{
             lockTime += Time.deltaTime;
 
             if (lockTime > 0.3)
-            {              
-
+            {   
                 if ( targetList.Contains(tempTarget) || tempTarget == null )
                 {
                     var tempTargetList = GameManager.instance.GetEnemiesOnScreen(1);
@@ -345,7 +318,6 @@ public class PlayerController : FighterController{
                        
                         foreach (Transform t in tempTargetList)
                         {
-
                             float newT = Vector2.Distance(mainCamera.WorldToViewportPoint(t.position), new Vector2(0.5f, 0.5f));
 
                             if (newT < lastDist && !targetList.Contains(t))
@@ -353,7 +325,6 @@ public class PlayerController : FighterController{
                                 toADD = t;
                                 lastDist = newT;
                             }
-                            //Debug.Log(newT);
                         }
 
                         if (!targetList.Contains(toADD) && toADD != null)
@@ -418,14 +389,11 @@ public class PlayerController : FighterController{
                     tempV.z = 0;
 
                     targetLockReticules[i].position = tempV;
-                    //Debug.Log(targetList[i].position);
                 }
                 else
                 {
                     Destroy(targetLockReticules[i].gameObject);
                 }
-
-
             }
         }
     }
@@ -448,7 +416,6 @@ public class PlayerController : FighterController{
 
     public override void TakeDamage(int ammount, DamageType.DamageTypes dType = DamageType.DamageTypes.Default)
     {
-        //Debug.Log("take it and like it");
         base.TakeDamage(ammount, dType);
         canvasController.UpdateHealthBar(myFighter.health.hull, myFighter.health.sheilds);
     }
@@ -457,6 +424,40 @@ public class PlayerController : FighterController{
     {
         isDead = true;
         Destroy(myFighter.gameObject);
+        ShowSpawnMenu();
+    }
+
+    public void ShowSpawnMenu()
+    {
+        canvasController.ShowSpawnMenu(true);
+        SetFighterIndex(selectedFighterIndex);
+    }
+
+    public void SetFighterIndex(int _index)
+    {
+        switch (_index)
+        {
+            case 0:
+                canvasController.SetSpawnText("Interceptor");
+                selectedFighterIndex = 0;
+                break;
+
+            case 1:
+                canvasController.SetSpawnText("Fighter");
+                selectedFighterIndex = 1;
+                break;
+
+            default:
+                canvasController.SetSpawnText("Fighter");
+                selectedFighterIndex = 1;
+                break;
+        }
+    }
+
+    public void CommitToRespawn()
+    {
+        canvasController.ShowSpawnMenu(false);
+        GameManager.instance.fightersWaitingToRespawn[team].Add(this);       
     }
 }
 

@@ -7,7 +7,6 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
     {
         TrackTarget(tick, targetPoint);
 
-
         if (targetRotationalPosition.horizontalAngle < 1 && targetRotationalPosition.horizontalAngle > -1)
         {
             if (targetRotationalPosition.verticalAngle < 1 && targetRotationalPosition.verticalAngle > -1)
@@ -16,7 +15,6 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
                 if (canFire && !isfiring)
                 {
                     StartCoroutine(FireTurret());
-
                 }                
             }
         }
@@ -36,7 +34,6 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
         canFire = true;
 
         AquireRandomTarget();
-
     }
 
     protected override void attemptFire()
@@ -45,7 +42,7 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
         var blastScript = blast.GetComponent<Projectile_Blast>();
         blastScript.ownerName = gameObject.name;
         blastScript.team = team;
-        //blast.name = ("EnergyBlast" + gameObject);
+        //blast.name = ("EnergyBlast" + gameObject);//???
         Destroy(blast, 15.0f);
 
         blast = (GameObject)Instantiate(blastPrefab, gunPorts[1].position, gunPorts[1].rotation);
@@ -54,5 +51,4 @@ public class ShipToShip_turretController : AnitShip_Turret_Controller {
         blastScript.team = team;
         Destroy(blast, 15.0f);
     }
-
 }

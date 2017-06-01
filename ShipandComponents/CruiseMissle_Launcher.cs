@@ -27,12 +27,11 @@ public class CruiseMissle_Launcher : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-
         if(component.health.hull > 0)
         {
-            MissleLauncherUpdate(Time.deltaTime);
-        }       
-
+           //currenlty does nothing,so remove it untill it does something. otherwise delete the whole thing later on.
+            // MissleLauncherUpdate(Time.deltaTime);
+        }
     }
 
     protected virtual void MissleLauncherUpdate(float tick)
@@ -45,8 +44,7 @@ public class CruiseMissle_Launcher : MonoBehaviour {
         yield return new WaitForSeconds(2);
 
         while (component.health.hull > 0)
-        {          
-
+        { 
             for (int i = 0; i < launchPoints.Length; i++)
             {
                 var spawnedOrdinance = (GameObject)Instantiate(missle_Prefab, launchPoints[i].position, launchPoints[i].rotation);
@@ -59,11 +57,10 @@ public class CruiseMissle_Launcher : MonoBehaviour {
                 mController.drift.z = Random.Range(-shipSize.z, shipSize.z);
 
                 float t = 0.1f + Random.Range(0, 0.1f);
-                //  yield return new WaitForSeconds(Random.Range(0, 0.3f));
                 yield return new WaitForSeconds(t);
             }
+
             yield return new WaitForSeconds(restTime);
         }
-        
     }
 }
